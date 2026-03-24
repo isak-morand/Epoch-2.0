@@ -16,8 +16,8 @@ namespace Epoch
 		virtual void OnEvent(Event& aEvent) = 0;
 
 		bool OnWindowClose(const WindowCloseEvent& aEvent) { myIsRunning = false; return true; }
-		bool OnWindowResize(const WindowCloseEvent& aEvent) { return true; }
-		bool OnWindowMinimiz(const WindowCloseEvent& aEvent) { return true; }
+		bool OnWindowResize(const WindowResizeEvent& aEvent) { return true; }
+		bool OnWindowMinimiz(const WindowMinimizeEvent& aEvent) { return true; }
 
 	private:
 		bool myIsRunning = false;

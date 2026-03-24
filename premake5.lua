@@ -62,5 +62,5 @@ workspace "Epoch"
 
 	group "Dependencies"
 		--include "CommonUtilities"
-		include "vendor/glfw"
+		include "deps/glfw"
 	group ""
