@@ -48,14 +48,7 @@ workspace "Epoch"
 
 	outputdir = "%{cfg.buildcfg}-%{cfg.architecture}"
 
-	defines 
-	{
-		"_CRT_SECURE_NO_WARNINGS",
-		"SPDLOG_USE_STD_FORMAT"
-	}
-
-	--filter "action:vs*"
-    --    linkoptions { "/ignore:4099" }
+	defines { "_CRT_SECURE_NO_WARNINGS", "SPDLOG_USE_STD_FORMAT" }
 
 	include "Epoch"
 	include "App"

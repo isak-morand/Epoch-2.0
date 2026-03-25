@@ -1,25 +1,16 @@
 #pragma once
-#include "Epoch/Events/WindowEvents.h"
 
 namespace Epoch
 {
 	class Application
 	{
 	public:
-		Application();
-		virtual ~Application();
+		Application() = default;
+		virtual ~Application() = default;
 
-		void Run();
+		virtual void OnStart() = 0;
+		virtual void OnShutdown() = 0;
 
-	protected:
-		virtual void OnUpdate() = 0;
-		virtual void OnEvent(Event& aEvent) = 0;
-
-		bool OnWindowClose(const WindowCloseEvent& aEvent) { myIsRunning = false; return true; }
-		bool OnWindowResize(const WindowResizeEvent& aEvent) { return true; }
-		bool OnWindowMinimiz(const WindowMinimizeEvent& aEvent) { return true; }
-
-	private:
-		bool myIsRunning = false;
+		virtual void OnUpdate(float aDeltaTime) = 0;
 	};
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "Epoch/Interface/Window.h"
+#include "Epoch/Core/Window.h"
 
 struct GLFWwindow;
 

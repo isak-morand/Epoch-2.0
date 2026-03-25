@@ -1,5 +1,6 @@
 project "App"
-	kind "ConsoleApp"
+	kind "WindowedApp"
+	entrypoint "mainCRTStartup"
 	targetname ("App")
 
     targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
