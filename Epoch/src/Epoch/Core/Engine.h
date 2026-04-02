@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "Window.h"
+#include "Epoch/Rendering/RendererDesc.h"
 
 namespace Epoch
 {
@@ -8,28 +9,42 @@ namespace Epoch
 	class Window;
 	class Event;
 	class WindowCloseEvent;
+	class WindowResizeEvent;
+	class Renderer;
 
-	struct EngineProperties
+	struct EngineDesc
 	{
-		WindowProperties WindowProps;
+		WindowDesc Window;
+		RendererDesc Renderer;
 	};
 
 	class Engine
 	{
 	public:
 		Engine() = delete;
-		explicit Engine(const EngineProperties& aProps);
+		explicit Engine(const EngineDesc& aDesc);
 		~Engine();
 
-		void Run(Application* aApp);
+		static Engine* Get() { return staticInstance; }
+
+		void SetApp(Application* aApp);
+
+		void Run();
+		void Stop() { myIsRunning = false; }
 
 	private:
 		void OnEvent(Event& aEvent);
-		bool OnWindowClose(WindowCloseEvent& aEvent) { myIsRunning = false; return true; }
+		bool OnWindowClose(WindowCloseEvent& aEvent);
+		bool OnWindowResize(WindowResizeEvent& aEvent);
 
 	private:
+		static inline Engine* staticInstance = nullptr;
+
 		bool myIsRunning = false;
 
+		Application* myApplication = nullptr;
+
 		std::unique_ptr<Window> myWindow;
+		std::unique_ptr<Renderer> myRenderer;
 	};
 }

@@ -2,6 +2,8 @@
 
 namespace Epoch
 {
+	class Event;
+
 	class Application
 	{
 	public:
@@ -12,5 +14,7 @@ namespace Epoch
 		virtual void OnShutdown() = 0;
 
 		virtual void OnUpdate(float aDeltaTime) = 0;
+
+		virtual void OnEvent(Event& aEvent) {}
 	};
 }

@@ -17,7 +17,6 @@ workspace "Epoch"
 	systemversion "latest"
 	
 	multiprocessorcompile ("On")
-	--enableunitybuild ("On")
 
 	staticruntime "Off"
 
@@ -28,7 +27,7 @@ workspace "Epoch"
     	runtime "Release"
 
 	filter "system:windows"
-		defines { "PLATFORM_WINDOWS" }
+		defines { "EPOCH_WIN32" }
 		buildoptions { "/Zc:preprocessor", "/Zc:__cplusplus" }
 		
 	filter "configurations:Debug"
@@ -48,12 +47,15 @@ workspace "Epoch"
 
 	outputdir = "%{cfg.buildcfg}-%{cfg.architecture}"
 
-	defines { "_CRT_SECURE_NO_WARNINGS", "SPDLOG_USE_STD_FORMAT" }
-
 	include "Epoch"
 	include "App"
 
 	group "Dependencies"
 		--include "CommonUtilities"
 		include "deps/glfw"
+		include "vendor/tracy"
+	group ""
+
+	group "Dependencies/NVRHI"
+		include "deps/NVRHI"
 	group ""

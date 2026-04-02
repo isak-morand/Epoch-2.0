@@ -8,10 +8,12 @@ namespace Epoch::Desktop
 	class GLFWWindow : public Window
 	{
 	public:
-		GLFWWindow(const WindowProperties& aProps);
+		GLFWWindow(const WindowDesc& aDesc);
 		~GLFWWindow() override;
 
 		void PollEvents() override;
+
+		void* GetNativeWindow() const override;
 
 	private:
 		GLFWwindow* myWindow;

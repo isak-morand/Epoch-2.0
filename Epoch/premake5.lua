@@ -18,22 +18,31 @@ project "Epoch"
 	{
         "src",
 		--"%{wks.location}/CommonUtilities/src",
+		"%{wks.location}/vendor/spdlog/include",
 		"%{wks.location}/vendor/glfw/include",
+
+		"%{wks.location}/vendor/NVRHI/include",
+		"%{wks.location}/vendor/NVRHI/thirdparty/DirectX-Headers/include",
+		"%{wks.location}/vendor/NVRHI/thirdparty/Vulkan-Headers/include",
+		
+		"%{wks.location}/vendor/tracy/tracy",
     }
 
     links
 	{
         --"CommonUtilities",
 		"GLFW",
+		"NVRHI",
+		"Tracy",
     }
 
-	--filter "configurations:Debug or configurations:Release"
-	--	defines
-	--	{
-	--		"TRACY_ENABLE",
-	--		"TRACY_ON_DEMAND",
-	--		"TRACY_CALLSTACK=10"
-	--	}
+	filter "configurations:Debug or configurations:Release"
+		defines
+		{
+			"TRACY_ENABLE",
+			"TRACY_ON_DEMAND",
+			"TRACY_CALLSTACK=10"
+		}
 
 	filter "configurations:Debug"
     	defines { "EPOCH_DEBUG" }
@@ -51,3 +60,5 @@ project "Epoch"
 			"NOMINMAX",
 			"GLFW_INCLUDE_NONE",
 		}
+
+	defines { "_CRT_SECURE_NO_WARNINGS", "SPDLOG_USE_STD_FORMAT" }

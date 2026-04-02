@@ -1,6 +1,9 @@
 project "App"
-	kind "WindowedApp"
-	entrypoint "mainCRTStartup"
+	kind "ConsoleApp"
+	filter { "system:windows", "configurations:Dist" }
+		kind "WindowedApp"
+	filter {}
+	
 	targetname ("App")
 
     targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -17,6 +20,8 @@ project "App"
 	{
         "src",
 		"%{wks.location}/Epoch/src",
+		"%{wks.location}/vendor/spdlog/include",
+		"%{wks.location}/vendor/tracy/tracy",
     }
 
     links
@@ -24,11 +29,15 @@ project "App"
         --"CommonUtilities",
 		"Epoch",
     }
+	
+	defines { "_CRT_SECURE_NO_WARNINGS", "SPDLOG_USE_STD_FORMAT" }
+	
+	filter "configurations:Debug or configurations:Release"
+		defines
+		{
+			"TRACY_ENABLE",
+			"TRACY_ON_DEMAND",
+			"TRACY_CALLSTACK=10"
+		}
 
-	--filter "configurations:Debug or configurations:Release"
-	--	defines
-	--	{
-	--		"TRACY_ENABLE",
-	--		"TRACY_ON_DEMAND",
-	--		"TRACY_CALLSTACK=10"
-	--	}
+	

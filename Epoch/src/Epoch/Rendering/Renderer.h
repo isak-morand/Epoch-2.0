@@ -1,14 +1,21 @@
 #pragma once
+#include "DeviceManager.h"
 
 namespace Epoch
 {
+	class Window;
+
 	class Renderer
 	{
 	public:
-		Renderer();
+		Renderer(Window* aWindow, const RendererDesc& aDesc);
 		~Renderer();
 
-	private:
+		void OnWindowResize(uint32_t aWidth, uint32_t aHeight);
 
+		void Render();
+
+	private:
+		std::unique_ptr<DeviceManager> myDeviceManager;
 	};
 }

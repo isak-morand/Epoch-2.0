@@ -7,7 +7,7 @@ namespace Epoch
 {
 	class Event;
 
-	struct WindowProperties
+	struct WindowDesc
 	{
 		std::string Title = "Epoch Application";
 		uint32_t Width = 1280;
@@ -20,14 +20,16 @@ namespace Epoch
 	public:
 		virtual ~Window() = default;
 
-		static std::unique_ptr<Window> Create(const WindowProperties& aProps);
+		static std::unique_ptr<Window> Create(const WindowDesc& aDesc);
 
 		void SetEventCallback(const EventCallbackFn& aCallback) { myData.EventCallback = aCallback; }
 
-		virtual void PollEvents() = 0;
-
 		uint32_t GetWidth() const { return myData.Width; }
 		uint32_t GetHeight() const { return myData.Height; }
+
+		virtual void PollEvents() = 0;
+
+		virtual void* GetNativeWindow() const = 0;
 
 	protected:
 		Window() = default;

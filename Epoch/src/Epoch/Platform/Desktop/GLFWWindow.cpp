@@ -2,7 +2,7 @@
 #include "GLFWWindow.h"
 
 #include <GLFW/glfw3.h>
-#ifdef PLATFORM_WINDOWS
+#ifdef EPOCH_WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <glfw/glfw3native.h>
 #endif
@@ -11,20 +11,20 @@
 
 namespace Epoch::Desktop
 {
-	static void GLFWErrorCallback(int error, const char* description)
+	#define LOG_TAG LogTags::Core
+
+	static void GLFWErrorCallback(int aError, const char* aDescription)
 	{
-		//LOG_ERROR("GLFW Error ({}): {}", error, description);
+		LOG_ERROR(LOG_TAG, "GLFW Error ({}): {}", aError, aDescription);
 	}
 
-	GLFWWindow::GLFWWindow(const WindowProperties& aProps)
+	GLFWWindow::GLFWWindow(const WindowDesc& aDesc)
 	{
-		myData.Width = aProps.Width;
-		myData.Height = aProps.Height;
-		myData.Title = aProps.Title;
+		myData.Width = aDesc.Width;
+		myData.Height = aDesc.Height;
+		myData.Title = aDesc.Title;
 
-		glfwInit();
-		//EPOCH_VERIFY(glfwInit(), "Could not initialize GLFW!");
-		glfwSetErrorCallback(GLFWErrorCallback);
+		EPOCH_VERIFY(glfwInit(), "Could not initialize GLFW!");
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
@@ -39,7 +39,7 @@ namespace Epoch::Desktop
 			nullptr
 		);
 
-		//EPOCH_VERIFY(myWindow, "Failed to create GLFW window!");
+		EPOCH_VERIFY(myWindow, "Failed to create GLFW window!");
 
 		glfwSetWindowUserPointer(myWindow, &myData);
 
@@ -49,7 +49,7 @@ namespace Epoch::Desktop
 		}
 		else
 		{
-			//LOG_WARNING("Raw mouse motion not supported.");
+			LOG_WARNING(LOG_TAG, "Raw mouse motion not supported.");
 		}
 
 		//Callbacks
@@ -151,7 +151,7 @@ namespace Epoch::Desktop
 		myData.Width = width;
 		myData.Height = height;
 
-		//LOG_INFO("Window created: {} ({}, {})", myData.Title, myData.Width, myData.Height);
+		LOG_INFO(LOG_TAG, "Window created: {} ({}, {})", myData.Title, myData.Width, myData.Height);
 	}
 
 	GLFWWindow::~GLFWWindow()
@@ -162,6 +162,37 @@ namespace Epoch::Desktop
 
 	void GLFWWindow::PollEvents()
 	{
+		static uint32_t frames = 0;
+		static double totalTime = 0.0;
+		static double lastTime = glfwGetTime();
+
+		double time = glfwGetTime();
+		double delta = time - lastTime;
+		lastTime = time;
+
+		frames++;
+		totalTime += delta;
+
+		if (totalTime >= 0.5)
+		{
+			double fps = frames / totalTime;
+
+			std::string title = "FPS: " + std::to_string((int)fps);
+			glfwSetWindowTitle(myWindow, title.c_str());
+
+			totalTime = 0.0;
+			frames = 0;
+		}
+
 		glfwPollEvents();
+	}
+
+	void* GLFWWindow::GetNativeWindow() const
+	{
+#ifdef EPOCH_WIN32
+		return (void*)glfwGetWin32Window(myWindow);
+#else
+		return nullptr;
+#endif
 	}
 }

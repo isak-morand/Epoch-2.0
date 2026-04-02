@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef PLATFORM_WINDOWS
+#ifdef EPOCH_WIN32
 #include <Windows.h>
 #include <shellapi.h>
 #endif
@@ -20,3 +20,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#include "Epoch/Debug/Log.h"
+#include "Epoch/Debug/Assert.h"
