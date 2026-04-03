@@ -49,15 +49,12 @@ namespace Epoch
 		{
 			EPOCH_PROFILE_SCOPE("Frame");
 
-			Sleep(10);
-		
 			myWindow->PollEvents();
 
 			if (myApplication)
 			{
 				myApplication->OnUpdate(1);
 			}
-			//myRenderer->Render();
 
 			EPOCH_PROFILE_MARK_FRAME;
 		}

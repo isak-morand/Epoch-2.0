@@ -103,8 +103,6 @@ namespace Epoch
 			myCommandList = myNvrhiDevice->createCommandList();
 		}
 
-		//Sleep(10);
-
 		myCommandList->open();
 		myCommandList->clearTextureFloat(mySwapChainBuffers[GetCurrentBackBufferIndex()].Buffer, nvrhi::AllSubresources, nvrhi::Color(1, 0, 0, 1));
 		myCommandList->close();
