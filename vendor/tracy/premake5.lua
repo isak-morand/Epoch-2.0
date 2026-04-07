@@ -41,3 +41,5 @@ project "Tracy"
 		"DbgHelp",
 		"ws2_32"
 	}
+
+	defines { "_CRT_SECURE_NO_WARNINGS" }
