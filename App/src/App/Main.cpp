@@ -5,8 +5,8 @@
 void Main(int aArgc, char** aArgv)
 {
     Epoch::EngineDesc desc;
-    desc.Window.Title = "Test app";
-    desc.Renderer.API = Epoch::GraphicsAPI::D3D12;
+    desc.window.title = "Test app";
+    desc.renderer.graphicsAPI = Epoch::GraphicsAPI::D3D12;
 
     Epoch::Engine engine(desc);
     App app;

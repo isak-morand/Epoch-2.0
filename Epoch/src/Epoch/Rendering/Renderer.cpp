@@ -5,7 +5,7 @@ namespace Epoch
 {
 	Renderer::Renderer(Window* aWindow, const RendererDesc& aDesc)
 	{
-		myDeviceManager = DeviceManager::Create(aDesc.API);
+		myDeviceManager = DeviceManager::Create(aDesc.graphicsAPI);
 		myDeviceManager->CreateDeviceAndSwapChain(aWindow);
 	}
 

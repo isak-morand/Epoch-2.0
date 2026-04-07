@@ -9,9 +9,13 @@ namespace Epoch
 
 	struct WindowDesc
 	{
-		std::string Title = "Epoch Application";
-		uint32_t Width = 1280;
-		uint32_t Height = 720;
+		std::string title = "Epoch Application";
+		uint32_t width = 1280;
+		uint32_t height = 720;
+
+		bool startMaximized = false;
+		bool startFullscreen = false;
+		bool startBorderless = false;
 	};
 
 	class Window
@@ -22,10 +26,10 @@ namespace Epoch
 
 		static std::unique_ptr<Window> Create(const WindowDesc& aDesc);
 
-		void SetEventCallback(const EventCallbackFn& aCallback) { myData.EventCallback = aCallback; }
+		void SetEventCallback(const EventCallbackFn& aCallback) { myData.eventCallback = aCallback; }
 
-		uint32_t GetWidth() const { return myData.Width; }
-		uint32_t GetHeight() const { return myData.Height; }
+		uint32_t GetWidth() const { return myData.width; }
+		uint32_t GetHeight() const { return myData.height; }
 
 		virtual void PollEvents() = 0;
 
@@ -37,11 +41,11 @@ namespace Epoch
 	protected:
 		struct WindowData
 		{
-			std::string Title = "";
-			uint32_t Width = 0;
-			uint32_t Height = 0;
+			std::string title = "";
+			uint32_t width = 0;
+			uint32_t height = 0;
 
-			EventCallbackFn EventCallback;
+			EventCallbackFn eventCallback;
 		} myData;
 	};
 }

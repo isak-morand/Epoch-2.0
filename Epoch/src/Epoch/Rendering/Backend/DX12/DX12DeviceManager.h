@@ -54,8 +54,8 @@ namespace Epoch
 
 		struct SwapChainBuffer
 		{
-			Microsoft::WRL::ComPtr<ID3D12Resource> NativeBuffer;
-			nvrhi::TextureHandle Buffer;
+			Microsoft::WRL::ComPtr<ID3D12Resource> nativeBuffer;
+			nvrhi::TextureHandle buffer;
 		};
 		std::vector<SwapChainBuffer>					mySwapChainBuffers;
 		Microsoft::WRL::ComPtr<ID3D12Fence>				myFrameFence;

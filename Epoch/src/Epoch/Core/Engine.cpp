@@ -14,10 +14,10 @@ namespace Epoch
 	{
 		staticInstance = this;
 
-		myWindow = Window::Create(aDesc.Window);
+		myWindow = Window::Create(aDesc.window);
 		myWindow->SetEventCallback([this](Event& aEvent) { OnEvent(aEvent); });
 
-		myRenderer = std::make_unique<Renderer>(myWindow.get(), aDesc.Renderer);
+		myRenderer = std::make_unique<Renderer>(myWindow.get(), aDesc.renderer);
 	}
 
 	Engine::~Engine()

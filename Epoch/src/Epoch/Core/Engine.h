@@ -14,8 +14,8 @@ namespace Epoch
 
 	struct EngineDesc
 	{
-		WindowDesc Window;
-		RendererDesc Renderer;
+		WindowDesc window;
+		RendererDesc renderer;
 	};
 
 	class Engine

@@ -104,7 +104,7 @@ namespace Epoch
 		}
 
 		myCommandList->open();
-		myCommandList->clearTextureFloat(mySwapChainBuffers[GetCurrentBackBufferIndex()].Buffer, nvrhi::AllSubresources, nvrhi::Color(1, 0, 0, 1));
+		myCommandList->clearTextureFloat(mySwapChainBuffers[GetCurrentBackBufferIndex()].buffer, nvrhi::AllSubresources, nvrhi::Color(1, 0, 0, 1));
 		myCommandList->close();
 
 		myNvrhiDevice->executeCommandList(myCommandList);
@@ -378,7 +378,7 @@ namespace Epoch
 
 		for (UINT n = 0; n < mySwapChainDesc.BufferCount; n++)
 		{
-			const HRESULT hr = mySwapChain->GetBuffer(n, IID_PPV_ARGS(mySwapChainBuffers[n].NativeBuffer.GetAddressOf()));
+			const HRESULT hr = mySwapChain->GetBuffer(n, IID_PPV_ARGS(mySwapChainBuffers[n].nativeBuffer.GetAddressOf()));
 			if (FAILED(hr))
 			{
 				return false;
@@ -427,7 +427,7 @@ namespace Epoch
 		mySwapChainFramebuffers.resize(mySwapChainDesc.BufferCount);
 		for (size_t i = 0; i < mySwapChainDesc.BufferCount; i++)
 		{
-			nvrhi::FramebufferDesc framebufferDesc = nvrhi::FramebufferDesc().addColorAttachment(mySwapChainBuffers[i].Buffer);
+			nvrhi::FramebufferDesc framebufferDesc = nvrhi::FramebufferDesc().addColorAttachment(mySwapChainBuffers[i].buffer);
 			mySwapChainFramebuffers[i] = myNvrhiDevice->createFramebuffer(framebufferDesc);
 		}
 	}

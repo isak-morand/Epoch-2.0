@@ -4,7 +4,7 @@
 
 struct LogTag
 {
-	const char* Name;
+	const char* name;
 };
 
 namespace LogTags
@@ -54,11 +54,11 @@ namespace Epoch
 
 		switch (aLevel)
 		{
-		case Level::Debug: staticAsyncLogger->trace("[{}] {}", aTag.Name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
-		case Level::Info:  staticAsyncLogger->info("[{}] {}", aTag.Name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
-		case Level::Warn:  staticAsyncLogger->warn("[{}] {}", aTag.Name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
-		case Level::Error: staticAsyncLogger->error("[{}] {}", aTag.Name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
-		case Level::Fatal: staticAsyncLogger->critical("[{}] {}", aTag.Name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
+		case Level::Debug: staticAsyncLogger->trace("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
+		case Level::Info:  staticAsyncLogger->info("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
+		case Level::Warn:  staticAsyncLogger->warn("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
+		case Level::Error: staticAsyncLogger->error("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
+		case Level::Fatal: staticAsyncLogger->critical("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
 		}
 	}
 

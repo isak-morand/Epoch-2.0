@@ -12,13 +12,8 @@ namespace Epoch
         NVN
     };
 
-    struct DeviceDesc
-    {
-
-    };
-
     struct RendererDesc
     {
-        GraphicsAPI API = GraphicsAPI::None;
+        GraphicsAPI graphicsAPI = GraphicsAPI::None;
     };
 }

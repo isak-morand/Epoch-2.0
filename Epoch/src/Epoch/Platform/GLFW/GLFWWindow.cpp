@@ -9,22 +9,27 @@
 
 #include "Epoch/Events/WindowEvents.h"
 
-namespace Epoch::Desktop
+namespace Epoch::GLFW
 {
 	#define LOG_TAG LogTags::Core
 
-	static void GLFWErrorCallback(int aError, const char* aDescription)
+	namespace
 	{
-		LOG_ERROR(LOG_TAG, "GLFW Error ({}): {}", aError, aDescription);
+		void GLFWErrorCallback(int aError, const char* aDescription)
+		{
+			LOG_ERROR(LOG_TAG, "GLFW Error ({}): {}", aError, aDescription);
+		}
 	}
 
 	GLFWWindow::GLFWWindow(const WindowDesc& aDesc)
 	{
-		myData.Width = aDesc.Width;
-		myData.Height = aDesc.Height;
-		myData.Title = aDesc.Title;
+		myData.width = aDesc.width;
+		myData.height = aDesc.height;
+		myData.title = aDesc.title;
 
 		EPOCH_VERIFY(glfwInit(), "Could not initialize GLFW!");
+
+		glfwSetErrorCallback(GLFWErrorCallback);
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
@@ -32,9 +37,9 @@ namespace Epoch::Desktop
 
 		myWindow = glfwCreateWindow
 		(
-			(int)myData.Width,
-			(int)myData.Height,
-			myData.Title.c_str(),
+			(int)myData.width,
+			(int)myData.height,
+			myData.title.c_str(),
 			nullptr,
 			nullptr
 		);
@@ -59,7 +64,7 @@ namespace Epoch::Desktop
 					auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 
 					WindowCloseEvent event;
-					data.EventCallback(event);
+					data.eventCallback(event);
 				});
 
 			glfwSetWindowSizeCallback(myWindow, [](GLFWwindow* window, int width, int height)
@@ -67,16 +72,16 @@ namespace Epoch::Desktop
 					auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 
 					WindowResizeEvent event((uint32_t)width, (uint32_t)height);
-					data.Width = width;
-					data.Height = height;
-					data.EventCallback(event);
+					data.width = width;
+					data.height = height;
+					data.eventCallback(event);
 				});
 
 			glfwSetWindowIconifyCallback(myWindow, [](GLFWwindow* window, int iconified)
 				{
 					auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 					WindowMinimizeEvent event((bool)iconified);
-					data.EventCallback(event);
+					data.eventCallback(event);
 				});
 
 			glfwSetKeyCallback(myWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -148,10 +153,10 @@ namespace Epoch::Desktop
 
 		int width, height;
 		glfwGetWindowSize(myWindow, &width, &height);
-		myData.Width = width;
-		myData.Height = height;
+		myData.width = width;
+		myData.height = height;
 
-		LOG_INFO(LOG_TAG, "Window created: {} ({}, {})", myData.Title, myData.Width, myData.Height);
+		LOG_INFO(LOG_TAG, "Window created: {} ({}, {})", myData.title, myData.width, myData.height);
 	}
 
 	GLFWWindow::~GLFWWindow()

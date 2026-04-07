@@ -3,7 +3,7 @@
 
 struct GLFWwindow;
 
-namespace Epoch::Desktop
+namespace Epoch::GLFW
 {
 	class GLFWWindow : public Window
 	{
