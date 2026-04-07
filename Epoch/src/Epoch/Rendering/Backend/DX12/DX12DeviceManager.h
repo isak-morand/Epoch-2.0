@@ -40,32 +40,32 @@ namespace Epoch
 		void DestroyFramebuffers();
 
 	private:
-		Microsoft::WRL::ComPtr<IDXGIFactory2>			myDxgiFactory2;
-		Microsoft::WRL::ComPtr<ID3D12Device>			myDevice12;
-		Microsoft::WRL::ComPtr<ID3D12CommandQueue>		myGraphicsQueue;
-		Microsoft::WRL::ComPtr<ID3D12CommandQueue>		myComputeQueue;
-		Microsoft::WRL::ComPtr<ID3D12CommandQueue>		myCopyQueue;
-		Microsoft::WRL::ComPtr<IDXGISwapChain3>			mySwapChain;
-		DXGI_SWAP_CHAIN_DESC1							mySwapChainDesc{};
-		DXGI_SWAP_CHAIN_FULLSCREEN_DESC					myFullScreenDesc{};
-		Microsoft::WRL::ComPtr<IDXGIAdapter>			myDxgiAdapter;
-		HWND											myHWND = nullptr;
-		bool											myTearingSupported = false;
+		Microsoft::WRL::ComPtr<IDXGIFactory2>			m_DxgiFactory2;
+		Microsoft::WRL::ComPtr<ID3D12Device>			m_Device12;
+		Microsoft::WRL::ComPtr<ID3D12CommandQueue>		m_GraphicsQueue;
+		Microsoft::WRL::ComPtr<ID3D12CommandQueue>		m_ComputeQueue;
+		Microsoft::WRL::ComPtr<ID3D12CommandQueue>		m_CopyQueue;
+		Microsoft::WRL::ComPtr<IDXGISwapChain3>			m_SwapChain;
+		DXGI_SWAP_CHAIN_DESC1							m_SwapChainDesc{};
+		DXGI_SWAP_CHAIN_FULLSCREEN_DESC					m_FullScreenDesc{};
+		Microsoft::WRL::ComPtr<IDXGIAdapter>			m_DxgiAdapter;
+		HWND											m_HWND = nullptr;
+		bool											m_TearingSupported = false;
 
 		struct SwapChainBuffer
 		{
 			Microsoft::WRL::ComPtr<ID3D12Resource> nativeBuffer;
 			nvrhi::TextureHandle buffer;
 		};
-		std::vector<SwapChainBuffer>					mySwapChainBuffers;
-		Microsoft::WRL::ComPtr<ID3D12Fence>				myFrameFence;
-		std::vector<HANDLE>                             myFrameFenceEvents;
+		std::vector<SwapChainBuffer>					m_SwapChainBuffers;
+		Microsoft::WRL::ComPtr<ID3D12Fence>				m_FrameFence;
+		std::vector<HANDLE>                             m_FrameFenceEvents;
 
-		std::vector<nvrhi::FramebufferHandle>			mySwapChainFramebuffers;
+		std::vector<nvrhi::FramebufferHandle>			m_SwapChainFramebuffers;
 
-		UINT64											myFrameCount = 1;
+		UINT64											m_FrameCount = 1;
 
-		nvrhi::DeviceHandle                             myNvrhiDevice;
-		nvrhi::CommandListHandle						myCommandList;
+		nvrhi::DeviceHandle                             m_NvrhiDevice;
+		nvrhi::CommandListHandle						m_CommandList;
 	};
 }

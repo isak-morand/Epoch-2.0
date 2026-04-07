@@ -25,18 +25,19 @@ namespace Epoch
 		epochSinks[1]->set_pattern("%^[%T] %v%$");
 
 		spdlog::init_thread_pool(8192, 1);
-		staticAsyncLogger = std::make_shared<spdlog::async_logger>("EPOCH", epochSinks.begin(), epochSinks.end(), spdlog::thread_pool());
+		s_AsyncLogger = std::make_shared<spdlog::async_logger>("EPOCH", epochSinks.begin(), epochSinks.end(), spdlog::thread_pool());
 
-		staticAsyncLogger->enable_backtrace(32);
-		staticAsyncLogger->set_level(spdlog::level::trace);
+		s_AsyncLogger->enable_backtrace(32);
+		s_AsyncLogger->set_level(spdlog::level::trace);
 
-		staticSyncLogger = std::make_shared<spdlog::logger>("EPOCH", epochSinks.begin(), epochSinks.end());
+		s_SyncLogger = std::make_shared<spdlog::logger>("EPOCH", epochSinks.begin(), epochSinks.end());
 	}
 
 	void Log::ShutDown()
 	{
 		spdlog::dump_backtrace();
-		staticAsyncLogger.reset();
+		s_AsyncLogger.reset();
+		s_SyncLogger.reset();
 		spdlog::drop_all();
 	}
 }

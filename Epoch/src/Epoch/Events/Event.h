@@ -32,18 +32,18 @@ namespace Epoch
 		Event() = default;
 		virtual ~Event() = default;
 
-		bool IsHandled() const { return myIsHandled; }
+		bool IsHandled() const { return m_IsHandled; }
 
 		virtual EventType GetEventType() const = 0;
 		virtual int GetCategoryFlags() const = 0;
 
 		bool IsInCategory(EventCategory aCategory) const
 		{
-			return GetCategoryFlags() & static_cast<int>(aCategory);
+			return GetCategoryFlags() & (int)aCategory;
 		}
 
 	private:
-		bool myIsHandled = false;
+		bool m_IsHandled = false;
 
 		friend class EventDispatcher;
 	};
@@ -55,20 +55,20 @@ namespace Epoch
 		template<typename T>
 		using EventFn = std::function<bool(T&)>;
 	public:
-		EventDispatcher(Event& aEvent) : myEvent(aEvent) {}
+		EventDispatcher(Event& aEvent) : m_Event(aEvent) {}
 
 		template<typename T>
 		bool Dispatch(EventFn<T> aFunc)
 		{
-			if (myEvent.GetEventType() != T::GetStaticType() || myEvent.myIsHandled)
+			if (m_Event.GetEventType() != T::GetStaticType() || m_Event.m_IsHandled)
 			{
 				return false;
 			}
 
-			myEvent.myIsHandled = aFunc(*(T*)&myEvent);
+			m_Event.m_IsHandled = aFunc(*(T*)&m_Event);
 			return true;
 		}
 	private:
-		Event& myEvent;
+		Event& m_Event;
 	};
 }

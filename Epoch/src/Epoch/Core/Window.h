@@ -26,10 +26,10 @@ namespace Epoch
 
 		static std::unique_ptr<Window> Create(const WindowDesc& aDesc);
 
-		void SetEventCallback(const EventCallbackFn& aCallback) { myData.eventCallback = aCallback; }
+		void SetEventCallback(const EventCallbackFn& aCallback) { m_EventCallback = aCallback; }
 
-		uint32_t GetWidth() const { return myData.width; }
-		uint32_t GetHeight() const { return myData.height; }
+		uint32_t GetWidth() const { return m_Width; }
+		uint32_t GetHeight() const { return m_Height; }
 
 		virtual void PollEvents() = 0;
 
@@ -39,13 +39,12 @@ namespace Epoch
 		Window() = default;
 		
 	protected:
-		struct WindowData
-		{
-			std::string title = "";
-			uint32_t width = 0;
-			uint32_t height = 0;
+		std::string m_Title = "";
+		uint32_t m_Width = 0;
+		uint32_t m_Height = 0;
 
-			EventCallbackFn eventCallback;
-		} myData;
+		EventCallbackFn m_EventCallback;
+
+		bool myIsMinimized = false;
 	};
 }

@@ -12,12 +12,12 @@ namespace Epoch
 {
 	Engine::Engine(const EngineDesc& aDesc)
 	{
-		staticInstance = this;
+		s_Instance = this;
 
-		myWindow = Window::Create(aDesc.window);
-		myWindow->SetEventCallback([this](Event& aEvent) { OnEvent(aEvent); });
+		m_Window = Window::Create(aDesc.window);
+		m_Window->SetEventCallback([this](Event& aEvent) { OnEvent(aEvent); });
 
-		myRenderer = std::make_unique<Renderer>(myWindow.get(), aDesc.renderer);
+		m_Renderer = std::make_unique<Renderer>(m_Window.get(), aDesc.renderer);
 	}
 
 	Engine::~Engine()
@@ -26,34 +26,34 @@ namespace Epoch
 
 	void Engine::SetApp(Application* aApp)
 	{
-		myApplication = aApp;
+		m_Application = aApp;
 	}
 
 	void Engine::Run()
 	{
-		if (myApplication)
+		if (m_Application)
 		{
-			myApplication->OnStart();
+			m_Application->OnStart();
 		}
 
 		std::thread renderThread([this]() {
-			while (myIsRunning)
+			while (m_IsRunning)
 			{
 				EPOCH_PROFILE_SCOPE("Render Thread");
-				myRenderer->Render();
+				m_Renderer->Render();
 			}
 			});
 
-		myIsRunning = true;
-		while (myIsRunning)
+		m_IsRunning = true;
+		while (m_IsRunning)
 		{
 			EPOCH_PROFILE_SCOPE("Frame");
 
-			myWindow->PollEvents();
+			m_Window->PollEvents();
 
-			if (myApplication)
+			if (m_Application)
 			{
-				myApplication->OnUpdate(1);
+				m_Application->OnUpdate(1);
 			}
 
 			EPOCH_PROFILE_MARK_FRAME;
@@ -61,17 +61,17 @@ namespace Epoch
 
 		renderThread.join();
 
-		if (myApplication)
+		if (m_Application)
 		{
-			myApplication->OnShutdown();
+			m_Application->OnShutdown();
 		}
 	}
 
 	void Engine::OnEvent(Event& aEvent)
 	{
-		if (myApplication)
+		if (m_Application)
 		{
-			myApplication->OnEvent(aEvent);
+			m_Application->OnEvent(aEvent);
 		}
 
 		if (aEvent.IsHandled()) return;
@@ -92,13 +92,13 @@ namespace Epoch
 
 	bool Engine::OnWindowClose(WindowCloseEvent& aEvent)
 	{
-		myIsRunning = false;
+		m_IsRunning = false;
 		return true;
 	}
 
 	bool Engine::OnWindowResize(WindowResizeEvent& aEvent)
 	{
-		myRenderer->OnWindowResize(aEvent.GetWidth(), aEvent.GetHeight());
+		m_Renderer->OnWindowResize(aEvent.GetWidth(), aEvent.GetHeight());
 		return true;
 	}
 }

@@ -15,7 +15,11 @@ namespace Epoch::GLFW
 
 		void* GetNativeWindow() const override;
 
+		void WindowCloseCallback();
+		void WindowSizeCallback(int aWidth, int aHeight);
+		void WindowIconifyCallback(int aIconified);
+
 	private:
-		GLFWwindow* myWindow;
+		GLFWwindow* m_Window;
 	};
 }

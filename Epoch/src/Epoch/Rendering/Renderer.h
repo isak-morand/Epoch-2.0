@@ -16,6 +16,6 @@ namespace Epoch
 		void Render();
 
 	private:
-		std::unique_ptr<DeviceManager> myDeviceManager;
+		std::unique_ptr<DeviceManager> m_DeviceManager;
 	};
 }

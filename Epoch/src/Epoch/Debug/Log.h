@@ -34,8 +34,8 @@ namespace Epoch
 		static void PrintAssertMessage(const char* aCondition, const char* aFile, int aLine, const char* aFunction, std::format_string<Args...> aMessage, Args&&... aArgs);
 
 	private:
-		inline static std::shared_ptr<spdlog::logger> staticAsyncLogger;
-		inline static std::shared_ptr<spdlog::logger> staticSyncLogger;
+		inline static std::shared_ptr<spdlog::logger> s_AsyncLogger;
+		inline static std::shared_ptr<spdlog::logger> s_SyncLogger;
 	};
 }
 
@@ -50,15 +50,15 @@ namespace Epoch
 	template<typename... Args>
 	void Log::PrintMessageTag(Log::Level aLevel, LogTag aTag, std::format_string<Args...> aFormat, Args&&... aArgs)
 	{
-		EPOCH_ASSERT(staticAsyncLogger, "Logger used before initialization!");
+		EPOCH_ASSERT(s_AsyncLogger, "Logger used before initialization!");
 
 		switch (aLevel)
 		{
-		case Level::Debug: staticAsyncLogger->trace("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
-		case Level::Info:  staticAsyncLogger->info("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
-		case Level::Warn:  staticAsyncLogger->warn("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
-		case Level::Error: staticAsyncLogger->error("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
-		case Level::Fatal: staticAsyncLogger->critical("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
+		case Level::Debug: s_AsyncLogger->trace("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
+		case Level::Info:  s_AsyncLogger->info("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
+		case Level::Warn:  s_AsyncLogger->warn("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
+		case Level::Error: s_AsyncLogger->error("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
+		case Level::Fatal: s_AsyncLogger->critical("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
 		}
 	}
 
@@ -71,8 +71,8 @@ namespace Epoch
 			"Assertion Failed!\n\nCondition: {}\nFile: {}\nLine: {}\nFunction: {}\n\n{}",
 			aCondition, aFile, aLine, aFunction, userMessage);
 
-		staticSyncLogger->critical("{}", finalMessage);
-		staticSyncLogger->flush();
+		s_SyncLogger->critical("{}", finalMessage);
+		s_SyncLogger->flush();
 
 #ifdef EPOCH_WIN32
 		MessageBoxA(nullptr, finalMessage.c_str(), "Epoch Assert", MB_OK | MB_ICONERROR);

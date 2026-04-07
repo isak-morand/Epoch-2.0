@@ -15,42 +15,86 @@ namespace Epoch::GLFW
 
 	namespace
 	{
-		void GLFWErrorCallback(int aError, const char* aDescription)
+		void ErrorCallback_GLFW(int aError, const char* aDescription)
 		{
 			LOG_ERROR(LOG_TAG, "GLFW Error ({}): {}", aError, aDescription);
+		}
+
+		void WindowCloseCallback_GLFW(GLFWwindow* window)
+		{
+			GLFWWindow* win = (GLFWWindow*)glfwGetWindowUserPointer(window);
+			win->WindowCloseCallback();
+		}
+
+		void WindowSizeCallback_GLFW(GLFWwindow* window, int width, int height)
+		{
+			GLFWWindow* win = (GLFWWindow*)glfwGetWindowUserPointer(window);
+			win->WindowSizeCallback(width, height);
+		}
+
+		void WindowIconifyCallback_GLFW(GLFWwindow* window, int iconified)
+		{
+			GLFWWindow* win = (GLFWWindow*)glfwGetWindowUserPointer(window);
+			win->WindowIconifyCallback(iconified);
 		}
 	}
 
 	GLFWWindow::GLFWWindow(const WindowDesc& aDesc)
 	{
-		myData.width = aDesc.width;
-		myData.height = aDesc.height;
-		myData.title = aDesc.title;
+		m_Width = aDesc.width;
+		m_Height = aDesc.height;
+		m_Title = aDesc.title;
 
 		EPOCH_VERIFY(glfwInit(), "Could not initialize GLFW!");
 
-		glfwSetErrorCallback(GLFWErrorCallback);
+		glfwSetErrorCallback(ErrorCallback_GLFW);
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
 		//glfwWindowHint(GLFW_VISIBLE, aProps.StartHidden ? GLFW_FALSE : GLFW_TRUE);
 
-		myWindow = glfwCreateWindow
+		if (aDesc.startBorderless)
+		{
+			glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+		}
+
+		m_Window = glfwCreateWindow
 		(
-			(int)myData.width,
-			(int)myData.height,
-			myData.title.c_str(),
+			(int)m_Width,
+			(int)m_Height,
+			m_Title.c_str(),
 			nullptr,
 			nullptr
 		);
 
-		EPOCH_VERIFY(myWindow, "Failed to create GLFW window!");
+		EPOCH_VERIFY(m_Window, "Failed to create GLFW window!");
 
-		glfwSetWindowUserPointer(myWindow, &myData);
+		if (aDesc.startFullscreen)
+		{
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+			int x, y;
+			glfwGetMonitorPos(monitor, &x, &y);
+
+			glfwSetWindowMonitor(m_Window, nullptr, x, y, mode->width, mode->height, mode->refreshRate);
+		}
+
+		if (aDesc.startMaximized)
+		{
+			glfwMaximizeWindow(m_Window);
+		}
+
+		int width, height;
+		glfwGetWindowSize(m_Window, &width, &height);
+		m_Width = width;
+		m_Height = height;
+
+		glfwSetWindowUserPointer(m_Window, this);
 
 		if (glfwRawMouseMotionSupported())
 		{
-			glfwSetInputMode(myWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+			glfwSetInputMode(m_Window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 		}
 		else
 		{
@@ -59,32 +103,11 @@ namespace Epoch::GLFW
 
 		//Callbacks
 		{
-			glfwSetWindowCloseCallback(myWindow, [](GLFWwindow* window)
-				{
-					auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
+			glfwSetWindowCloseCallback(m_Window, WindowCloseCallback_GLFW);
+			glfwSetWindowSizeCallback(m_Window, WindowSizeCallback_GLFW);
+			glfwSetWindowIconifyCallback(m_Window, WindowIconifyCallback_GLFW);
 
-					WindowCloseEvent event;
-					data.eventCallback(event);
-				});
-
-			glfwSetWindowSizeCallback(myWindow, [](GLFWwindow* window, int width, int height)
-				{
-					auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
-
-					WindowResizeEvent event((uint32_t)width, (uint32_t)height);
-					data.width = width;
-					data.height = height;
-					data.eventCallback(event);
-				});
-
-			glfwSetWindowIconifyCallback(myWindow, [](GLFWwindow* window, int iconified)
-				{
-					auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
-					WindowMinimizeEvent event((bool)iconified);
-					data.eventCallback(event);
-				});
-
-			glfwSetKeyCallback(myWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+			glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 				{
 					//auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 					//
@@ -105,7 +128,7 @@ namespace Epoch::GLFW
 					//}
 				});
 
-			glfwSetCharCallback(myWindow, [](GLFWwindow* window, uint32_t codepoint)
+			glfwSetCharCallback(m_Window, [](GLFWwindow* window, uint32_t codepoint)
 				{
 					//auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 					//
@@ -113,7 +136,7 @@ namespace Epoch::GLFW
 					//data.EventCallback(event);
 				});
 
-			glfwSetMouseButtonCallback(myWindow, [](GLFWwindow* window, int button, int action, int mods)
+			glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
 				{
 					//auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 					//
@@ -134,7 +157,7 @@ namespace Epoch::GLFW
 					//}
 				});
 
-			glfwSetScrollCallback(myWindow, [](GLFWwindow* window, double xOffset, double yOffset)
+			glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 				{
 					//auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 					//
@@ -142,7 +165,7 @@ namespace Epoch::GLFW
 					//data.EventCallback(event);
 				});
 
-			glfwSetCursorPosCallback(myWindow, [](GLFWwindow* window, double x, double y)
+			glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double x, double y)
 				{
 					//auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
 					//
@@ -151,17 +174,12 @@ namespace Epoch::GLFW
 				});
 		}
 
-		int width, height;
-		glfwGetWindowSize(myWindow, &width, &height);
-		myData.width = width;
-		myData.height = height;
-
-		LOG_INFO(LOG_TAG, "Window created: {} ({}, {})", myData.title, myData.width, myData.height);
+		LOG_INFO(LOG_TAG, "Window created: {} ({}, {})", m_Title, m_Width, m_Height);
 	}
 
 	GLFWWindow::~GLFWWindow()
 	{
-		glfwDestroyWindow(myWindow);
+		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 	}
 
@@ -183,7 +201,7 @@ namespace Epoch::GLFW
 			double fps = frames / totalTime;
 
 			std::string title = "FPS: " + std::to_string((int)fps);
-			glfwSetWindowTitle(myWindow, title.c_str());
+			glfwSetWindowTitle(m_Window, title.c_str());
 
 			totalTime = 0.0;
 			frames = 0;
@@ -195,9 +213,30 @@ namespace Epoch::GLFW
 	void* GLFWWindow::GetNativeWindow() const
 	{
 #ifdef EPOCH_WIN32
-		return (void*)glfwGetWin32Window(myWindow);
+		return (void*)glfwGetWin32Window(m_Window);
 #else
 		return nullptr;
 #endif
+	}
+
+	void GLFWWindow::WindowCloseCallback()
+	{
+		WindowCloseEvent event;
+		m_EventCallback(event);
+	}
+
+	void GLFWWindow::WindowSizeCallback(int aWidth, int aHeight)
+	{
+		m_Width = aWidth;
+		m_Height = aHeight;
+		WindowResizeEvent event((uint32_t)aWidth, (uint32_t)aHeight);
+		m_EventCallback(event);
+	}
+
+	void GLFWWindow::WindowIconifyCallback(int aIconified)
+	{
+		myIsMinimized = (bool)aIconified;
+		WindowMinimizeEvent event(myIsMinimized);
+		m_EventCallback(event);
 	}
 }

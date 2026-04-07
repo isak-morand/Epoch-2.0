@@ -5,26 +5,26 @@ namespace Epoch
 {
 	Renderer::Renderer(Window* aWindow, const RendererDesc& aDesc)
 	{
-		myDeviceManager = DeviceManager::Create(aDesc.graphicsAPI);
-		myDeviceManager->CreateDeviceAndSwapChain(aWindow);
+		m_DeviceManager = DeviceManager::Create(aDesc.graphicsAPI);
+		m_DeviceManager->CreateDeviceAndSwapChain(aWindow);
 	}
 
 	Renderer::~Renderer()
 	{
-		myDeviceManager->DestroyDeviceAndSwapChain();
+		m_DeviceManager->DestroyDeviceAndSwapChain();
 	}
 
 	void Renderer::OnWindowResize(uint32_t aWidth, uint32_t aHeight)
 	{
-		myDeviceManager->ResizeSwapChain(aWidth, aHeight);
+		m_DeviceManager->ResizeSwapChain(aWidth, aHeight);
 	}
 
 	void Renderer::Render()
 	{
-		myDeviceManager->BeginFrame();
+		m_DeviceManager->BeginFrame();
 
-		myDeviceManager->Render();
+		m_DeviceManager->Render();
 
-		myDeviceManager->EndFrame();
+		m_DeviceManager->EndFrame();
 	}
 }

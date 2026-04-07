@@ -25,12 +25,12 @@ namespace Epoch
 		explicit Engine(const EngineDesc& aDesc);
 		~Engine();
 
-		static Engine* Get() { return staticInstance; }
+		static Engine* Get() { return s_Instance; }
 
 		void SetApp(Application* aApp);
 
 		void Run();
-		void Stop() { myIsRunning = false; }
+		void Stop() { m_IsRunning = false; }
 
 	private:
 		void OnEvent(Event& aEvent);
@@ -38,13 +38,13 @@ namespace Epoch
 		bool OnWindowResize(WindowResizeEvent& aEvent);
 
 	private:
-		static inline Engine* staticInstance = nullptr;
+		static inline Engine* s_Instance = nullptr;
 
-		bool myIsRunning = false;
+		bool m_IsRunning = false;
 
-		Application* myApplication = nullptr;
+		Application* m_Application = nullptr;
 
-		std::unique_ptr<Window> myWindow;
-		std::unique_ptr<Renderer> myRenderer;
+		std::unique_ptr<Window> m_Window;
+		std::unique_ptr<Renderer> m_Renderer;
 	};
 }

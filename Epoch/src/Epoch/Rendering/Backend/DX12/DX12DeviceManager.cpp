@@ -16,44 +16,44 @@ namespace Epoch
 	{
 		DestroyRenderTargets();
 
-		myNvrhiDevice = nullptr;
+		m_NvrhiDevice = nullptr;
 
-		for (auto fenceEvent : myFrameFenceEvents)
+		for (auto fenceEvent : m_FrameFenceEvents)
 		{
 			WaitForSingleObject(fenceEvent, INFINITE);
 			CloseHandle(fenceEvent);
 		}
 
-		myFrameFenceEvents.clear();
+		m_FrameFenceEvents.clear();
 
-		if (mySwapChain)
+		if (m_SwapChain)
 		{
-			mySwapChain->SetFullscreenState(false, nullptr);
+			m_SwapChain->SetFullscreenState(false, nullptr);
 		}
 
-		mySwapChainBuffers.clear();
+		m_SwapChainBuffers.clear();
 
-		myFrameFence = nullptr;
-		mySwapChain = nullptr;
-		myGraphicsQueue = nullptr;
-		myComputeQueue = nullptr;
-		myCopyQueue = nullptr;
-		myDevice12 = nullptr;
+		m_FrameFence = nullptr;
+		m_SwapChain = nullptr;
+		m_GraphicsQueue = nullptr;
+		m_ComputeQueue = nullptr;
+		m_CopyQueue = nullptr;
+		m_Device12 = nullptr;
 	}
 
 	void DX12DeviceManager::ResizeSwapChain(uint32_t aWidth, uint32_t aHeight)
 	{
 		DestroyRenderTargets();
 
-		if (!myNvrhiDevice) return;
-		if (!mySwapChain) return;
+		if (!m_NvrhiDevice) return;
+		if (!m_SwapChain) return;
 
-		const HRESULT hr = mySwapChain->ResizeBuffers(
-			mySwapChainDesc.BufferCount,
+		const HRESULT hr = m_SwapChain->ResizeBuffers(
+			m_SwapChainDesc.BufferCount,
 			aWidth,
 			aHeight,
 			DXGI_FORMAT_UNKNOWN,
-			mySwapChainDesc.Flags);
+			m_SwapChainDesc.Flags);
 		
 		if (FAILED(hr))
 		{
@@ -70,7 +70,7 @@ namespace Epoch
 	bool DX12DeviceManager::BeginFrame()
 	{
 		UINT bufferIndex = GetCurrentBackBufferIndex();
-		WaitForSingleObject(myFrameFenceEvents[bufferIndex], INFINITE);
+		WaitForSingleObject(m_FrameFenceEvents[bufferIndex], INFINITE);
 
 		return true;
 	}
@@ -80,41 +80,41 @@ namespace Epoch
 		const uint32_t bufferIndex = GetCurrentBackBufferIndex();
 
 		UINT presentFlags = 0;
-		if (/*!m_DeviceParams.vsyncEnabled && */myFullScreenDesc.Windowed && myTearingSupported)
+		if (/*!m_DeviceParams.vsyncEnabled && */m_FullScreenDesc.Windowed && m_TearingSupported)
 		{
 			presentFlags |= DXGI_PRESENT_ALLOW_TEARING;
 		}
 
-		HRESULT result = mySwapChain->Present(0/*myDeviceParams.vsyncEnabled ? 1 : 0*/, presentFlags);
+		HRESULT result = m_SwapChain->Present(0/*m_DeviceParams.vsyncEnabled ? 1 : 0*/, presentFlags);
 
-		myFrameFence->SetEventOnCompletion(myFrameCount, myFrameFenceEvents[bufferIndex]);
-		myGraphicsQueue->Signal(myFrameFence.Get(), myFrameCount);
-		myFrameCount++;
+		m_FrameFence->SetEventOnCompletion(m_FrameCount, m_FrameFenceEvents[bufferIndex]);
+		m_GraphicsQueue->Signal(m_FrameFence.Get(), m_FrameCount);
+		m_FrameCount++;
 
-		myNvrhiDevice->runGarbageCollection();
+		m_NvrhiDevice->runGarbageCollection();
 
 		return SUCCEEDED(result);
 	}
 
 	void DX12DeviceManager::Render()
 	{
-		if (!myCommandList)
+		if (!m_CommandList)
 		{
-			myCommandList = myNvrhiDevice->createCommandList();
+			m_CommandList = m_NvrhiDevice->createCommandList();
 		}
 
-		myCommandList->open();
-		myCommandList->clearTextureFloat(mySwapChainBuffers[GetCurrentBackBufferIndex()].buffer, nvrhi::AllSubresources, nvrhi::Color(1, 0, 0, 1));
-		myCommandList->close();
+		m_CommandList->open();
+		m_CommandList->clearTextureFloat(m_SwapChainBuffers[GetCurrentBackBufferIndex()].buffer, nvrhi::AllSubresources, nvrhi::Color(1, 0, 0, 1));
+		m_CommandList->close();
 
-		myNvrhiDevice->executeCommandList(myCommandList);
+		m_NvrhiDevice->executeCommandList(m_CommandList);
 	}
 
 	bool DX12DeviceManager::CreateInstance()
 	{
-		if (!myDxgiFactory2)
+		if (!m_DxgiFactory2)
 		{
-			HRESULT hres = CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG/*myEnableDebugRuntime ? DXGI_CREATE_FACTORY_DEBUG : 0*/, IID_PPV_ARGS(&myDxgiFactory2));
+			HRESULT hres = CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG/*m_EnableDebugRuntime ? DXGI_CREATE_FACTORY_DEBUG : 0*/, IID_PPV_ARGS(&m_DxgiFactory2));
 			if (hres != S_OK)
 			{
 				LOG_ERROR(LOG_TAG, "Failed to create DXGIFactory2!");
@@ -127,7 +127,7 @@ namespace Epoch
 
 	bool DX12DeviceManager::CreateDevice()
 	{
-		//if (myEnableDebugRuntime)
+		//if (m_EnableDebugRuntime)
 		{
 			Microsoft::WRL::ComPtr<ID3D12Debug> pDebug;
 			HRESULT hr = D3D12GetDebugInterface(IID_PPV_ARGS(pDebug.GetAddressOf()));
@@ -159,7 +159,7 @@ namespace Epoch
 
 		int adapterIndex = 0;
 
-		if (FAILED(myDxgiFactory2->EnumAdapters(adapterIndex, myDxgiAdapter.GetAddressOf())))
+		if (FAILED(m_DxgiFactory2->EnumAdapters(adapterIndex, m_DxgiAdapter.GetAddressOf())))
 		{
 			if (adapterIndex == 0)
 			{
@@ -175,13 +175,13 @@ namespace Epoch
 
 		//{
 		//	DXGI_ADAPTER_DESC aDesc;
-		//	myDxgiAdapter->GetDesc(&aDesc);
+		//	m_DxgiAdapter->GetDesc(&aDesc);
 		//
 		//	m_RendererString = GetAdapterName(aDesc);
 		//	m_IsNvidia = IsNvDeviceID(aDesc.VendorId);
 		//}
 
-		HRESULT hr = D3D12CreateDevice(myDxgiAdapter.Get(), D3D_FEATURE_LEVEL_11_1, IID_PPV_ARGS(myDevice12.GetAddressOf()));
+		HRESULT hr = D3D12CreateDevice(m_DxgiAdapter.Get(), D3D_FEATURE_LEVEL_11_1, IID_PPV_ARGS(m_Device12.GetAddressOf()));
 		
 		if (FAILED(hr))
 		{
@@ -189,10 +189,10 @@ namespace Epoch
 			return false;
 		}
 
-		//if (myEnableDebugRuntime)
+		//if (m_EnableDebugRuntime)
 		{
 			Microsoft::WRL::ComPtr<ID3D12InfoQueue> pInfoQueue;
-			myDevice12->QueryInterface(pInfoQueue.GetAddressOf());
+			m_Device12->QueryInterface(pInfoQueue.GetAddressOf());
 
 			if (pInfoQueue)
 			{
@@ -225,49 +225,49 @@ namespace Epoch
 		queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 		queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 		queueDesc.NodeMask = 1;
-		hr = myDevice12->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(myGraphicsQueue.GetAddressOf()));
+		hr = m_Device12->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(m_GraphicsQueue.GetAddressOf()));
 		if (FAILED(hr))
 		{
 			return false;
 		}
-		myGraphicsQueue->SetName(L"Graphics Queue");
+		m_GraphicsQueue->SetName(L"Graphics Queue");
 
 		//if (m_DeviceParams.enableComputeQueue)
 		//{
 		//	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
-		//	hr = myDevice12->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(myComputeQueue.GetAddressOf()));
+		//	hr = m_Device12->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(m_ComputeQueue.GetAddressOf()));
 		//	if (FAILED(hr))
 		//	{
 		//		return false;
 		//	}
-		//	myComputeQueue->SetName(L"Compute Queue");
+		//	m_ComputeQueue->SetName(L"Compute Queue");
 		//}
 		//
 		//if (m_DeviceParams.enableCopyQueue)
 		//{
 		//	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_COPY;
-		//	hr = myDevice12->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(myCopyQueue.GetAddressOf()));
+		//	hr = m_Device12->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(m_CopyQueue.GetAddressOf()));
 		//	if (FAILED(hr))
 		//	{
 		//		return false;
 		//	}
-		//	myCopyQueue->SetName(L"Copy Queue");
+		//	m_CopyQueue->SetName(L"Copy Queue");
 		//}
 
 		nvrhi::d3d12::DeviceDesc deviceDesc;
-		//deviceDesc.errorCB = myDeviceParams.messageCallback ? m_DeviceParams.messageCallback : &DefaultMessageCallback::GetInstance();
-		deviceDesc.pDevice = myDevice12.Get();
-		deviceDesc.pGraphicsCommandQueue = myGraphicsQueue.Get();
-		deviceDesc.pComputeCommandQueue = myComputeQueue.Get();
-		deviceDesc.pCopyCommandQueue = myCopyQueue.Get();
-		//deviceDesc.logBufferLifetime = myDeviceParams.logBufferLifetime;
+		//deviceDesc.errorCB = m_DeviceParams.messageCallback ? m_DeviceParams.messageCallback : &DefaultMessageCallback::GetInstance();
+		deviceDesc.pDevice = m_Device12.Get();
+		deviceDesc.pGraphicsCommandQueue = m_GraphicsQueue.Get();
+		deviceDesc.pComputeCommandQueue = m_ComputeQueue.Get();
+		deviceDesc.pCopyCommandQueue = m_CopyQueue.Get();
+		//deviceDesc.logBufferLifetime = m_DeviceParams.logBufferLifetime;
 		deviceDesc.enableHeapDirectlyIndexed = false;
 
-		myNvrhiDevice = nvrhi::d3d12::createDevice(deviceDesc);
+		m_NvrhiDevice = nvrhi::d3d12::createDevice(deviceDesc);
 
 		//if (m_DeviceParams.enableNvrhiValidationLayer)
 		{
-			myNvrhiDevice = nvrhi::validation::createValidationLayer(myNvrhiDevice);
+			m_NvrhiDevice = nvrhi::validation::createValidationLayer(m_NvrhiDevice);
 		}
 
 		return true;
@@ -284,17 +284,17 @@ namespace Epoch
 		UINT width = clientRect.right - clientRect.left;
 		UINT height = clientRect.bottom - clientRect.top;
 
-		ZeroMemory(&mySwapChainDesc, sizeof(mySwapChainDesc));
-		mySwapChainDesc.Width = width;
-		mySwapChainDesc.Height = height;
-		mySwapChainDesc.SampleDesc.Count = 1;//m_DeviceParams.swapChainSampleCount;
-		mySwapChainDesc.SampleDesc.Quality = 0;
-		mySwapChainDesc.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT;//m_DeviceParams.swapChainUsage;
-		mySwapChainDesc.BufferCount = 3;//m_DeviceParams.swapChainBufferCount;
-		mySwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-		mySwapChainDesc.Flags = 0;//m_DeviceParams.allowModeSwitch ? DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH : 0;
+		ZeroMemory(&m_SwapChainDesc, sizeof(m_SwapChainDesc));
+		m_SwapChainDesc.Width = width;
+		m_SwapChainDesc.Height = height;
+		m_SwapChainDesc.SampleDesc.Count = 1;//m_DeviceParams.swapChainSampleCount;
+		m_SwapChainDesc.SampleDesc.Quality = 0;
+		m_SwapChainDesc.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT;//m_DeviceParams.swapChainUsage;
+		m_SwapChainDesc.BufferCount = 3;//m_DeviceParams.swapChainBufferCount;
+		m_SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		m_SwapChainDesc.Flags = 0;//m_DeviceParams.allowModeSwitch ? DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH : 0;
 
-		mySwapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		m_SwapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		//switch (m_DeviceParams.swapChainFormat)
 		//{
 		//case nvrhi::Format::SRGBA8_UNORM:
@@ -309,35 +309,35 @@ namespace Epoch
 		//}
 
 		Microsoft::WRL::ComPtr<IDXGIFactory5> pDxgiFactory5;
-		if (SUCCEEDED(myDxgiFactory2->QueryInterface(IID_PPV_ARGS(pDxgiFactory5.GetAddressOf()))))
+		if (SUCCEEDED(m_DxgiFactory2->QueryInterface(IID_PPV_ARGS(pDxgiFactory5.GetAddressOf()))))
 		{
 			BOOL supported = 0;
 			if (SUCCEEDED(pDxgiFactory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &supported, sizeof(supported))))
 			{
-				myTearingSupported = (supported != 0);
+				m_TearingSupported = (supported != 0);
 			}
 		}
 
-		if (myTearingSupported)
+		if (m_TearingSupported)
 		{
-			mySwapChainDesc.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+			m_SwapChainDesc.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 		}
 
-		myFullScreenDesc = {};
-		myFullScreenDesc.RefreshRate.Numerator = 0;//myDeviceParams.refreshRate;
-		myFullScreenDesc.RefreshRate.Denominator = 1;
-		myFullScreenDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
-		myFullScreenDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-		myFullScreenDesc.Windowed = true;//!m_DeviceParams.startFullscreen;
+		m_FullScreenDesc = {};
+		m_FullScreenDesc.RefreshRate.Numerator = 0;//m_DeviceParams.refreshRate;
+		m_FullScreenDesc.RefreshRate.Denominator = 1;
+		m_FullScreenDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
+		m_FullScreenDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+		m_FullScreenDesc.Windowed = true;//!m_DeviceParams.startFullscreen;
 
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> pSwapChain1;
-		hr = myDxgiFactory2->CreateSwapChainForHwnd(myGraphicsQueue.Get(), hWnd, &mySwapChainDesc, &myFullScreenDesc, nullptr, &pSwapChain1);
+		hr = m_DxgiFactory2->CreateSwapChainForHwnd(m_GraphicsQueue.Get(), hWnd, &m_SwapChainDesc, &m_FullScreenDesc, nullptr, &pSwapChain1);
 		if (FAILED(hr))
 		{
 			return false;
 		}
 
-		hr = pSwapChain1->QueryInterface(IID_PPV_ARGS(mySwapChain.GetAddressOf()));
+		hr = pSwapChain1->QueryInterface(IID_PPV_ARGS(m_SwapChain.GetAddressOf()));
 		if (FAILED(hr))
 		{
 			return false;
@@ -348,15 +348,15 @@ namespace Epoch
 			return false;
 		}
 
-		hr = myDevice12->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(myFrameFence.GetAddressOf()));
+		hr = m_Device12->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_FrameFence.GetAddressOf()));
 		if (FAILED(hr))
 		{
 			return false;
 		}
 
-		for (UINT bufferIndex = 0; bufferIndex < mySwapChainDesc.BufferCount; bufferIndex++)
+		for (UINT bufferIndex = 0; bufferIndex < m_SwapChainDesc.BufferCount; bufferIndex++)
 		{
-			myFrameFenceEvents.push_back(CreateEvent(nullptr, false, true, nullptr));
+			m_FrameFenceEvents.push_back(CreateEvent(nullptr, false, true, nullptr));
 		}
 
 		return true;
@@ -364,31 +364,31 @@ namespace Epoch
 
 	uint32_t DX12DeviceManager::GetCurrentBackBufferIndex()
 	{
-		return mySwapChain->GetCurrentBackBufferIndex();
+		return m_SwapChain->GetCurrentBackBufferIndex();
 	}
 
 	uint32_t DX12DeviceManager::GetBackBufferCount()
 	{
-		return mySwapChainDesc.BufferCount;
+		return m_SwapChainDesc.BufferCount;
 	}
 
 	bool DX12DeviceManager::CreateRenderTargets()
 	{
-		mySwapChainBuffers.resize(mySwapChainDesc.BufferCount);
+		m_SwapChainBuffers.resize(m_SwapChainDesc.BufferCount);
 
-		for (UINT n = 0; n < mySwapChainDesc.BufferCount; n++)
+		for (UINT n = 0; n < m_SwapChainDesc.BufferCount; n++)
 		{
-			const HRESULT hr = mySwapChain->GetBuffer(n, IID_PPV_ARGS(mySwapChainBuffers[n].nativeBuffer.GetAddressOf()));
+			const HRESULT hr = m_SwapChain->GetBuffer(n, IID_PPV_ARGS(m_SwapChainBuffers[n].nativeBuffer.GetAddressOf()));
 			if (FAILED(hr))
 			{
 				return false;
 			}
 
 			nvrhi::TextureDesc textureDesc;
-			textureDesc.width = mySwapChainDesc.Width;
-			textureDesc.height = mySwapChainDesc.Height;
-			textureDesc.sampleCount = mySwapChainDesc.SampleDesc.Count;
-			textureDesc.sampleQuality = mySwapChainDesc.SampleDesc.Quality;
+			textureDesc.width = m_SwapChainDesc.Width;
+			textureDesc.height = m_SwapChainDesc.Height;
+			textureDesc.sampleCount = m_SwapChainDesc.SampleDesc.Count;
+			textureDesc.sampleQuality = m_SwapChainDesc.SampleDesc.Quality;
 			textureDesc.format = nvrhi::Format::RGBA8_UNORM;
 			textureDesc.debugName = "SwapChainBuffer";
 			textureDesc.isRenderTarget = true;
@@ -396,7 +396,7 @@ namespace Epoch
 			textureDesc.initialState = nvrhi::ResourceStates::Present;
 			textureDesc.keepInitialState = true;
 
-			mySwapChainBuffers[n].Buffer = myNvrhiDevice->createHandleForNativeTexture(nvrhi::ObjectTypes::D3D12_Resource, nvrhi::Object(mySwapChainBuffers[n].NativeBuffer.Get()), textureDesc);
+			m_SwapChainBuffers[n].buffer = m_NvrhiDevice->createHandleForNativeTexture(nvrhi::ObjectTypes::D3D12_Resource, nvrhi::Object(m_SwapChainBuffers[n].nativeBuffer.Get()), textureDesc);
 		}
 
 		CreateFramebuffers();
@@ -408,32 +408,32 @@ namespace Epoch
 	{
 		DestroyFramebuffers();
 
-		if (myNvrhiDevice)
+		if (m_NvrhiDevice)
 		{
-			myNvrhiDevice->waitForIdle();
-			myNvrhiDevice->runGarbageCollection();
+			m_NvrhiDevice->waitForIdle();
+			m_NvrhiDevice->runGarbageCollection();
 		}
 
-		for (auto e : myFrameFenceEvents)
+		for (auto e : m_FrameFenceEvents)
 		{
 			SetEvent(e);
 		}
 
-		mySwapChainBuffers.clear();
+		m_SwapChainBuffers.clear();
 	}
 	
 	void DX12DeviceManager::CreateFramebuffers()
 	{
-		mySwapChainFramebuffers.resize(mySwapChainDesc.BufferCount);
-		for (size_t i = 0; i < mySwapChainDesc.BufferCount; i++)
+		m_SwapChainFramebuffers.resize(m_SwapChainDesc.BufferCount);
+		for (size_t i = 0; i < m_SwapChainDesc.BufferCount; i++)
 		{
-			nvrhi::FramebufferDesc framebufferDesc = nvrhi::FramebufferDesc().addColorAttachment(mySwapChainBuffers[i].buffer);
-			mySwapChainFramebuffers[i] = myNvrhiDevice->createFramebuffer(framebufferDesc);
+			nvrhi::FramebufferDesc framebufferDesc = nvrhi::FramebufferDesc().addColorAttachment(m_SwapChainBuffers[i].buffer);
+			m_SwapChainFramebuffers[i] = m_NvrhiDevice->createFramebuffer(framebufferDesc);
 		}
 	}
 
 	void DX12DeviceManager::DestroyFramebuffers()
 	{
-		mySwapChainFramebuffers.clear();
+		m_SwapChainFramebuffers.clear();
 	}
 }
