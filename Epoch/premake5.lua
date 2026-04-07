@@ -20,12 +20,12 @@ project "Epoch"
 		--"%{wks.location}/CommonUtilities/src",
 		"%{wks.location}/vendor/spdlog/include",
 		"%{wks.location}/vendor/glfw/include",
+		"%{wks.location}/vendor/tracy/tracy",
+		"%{wks.location}/vendor/yaml-cpp/include",
 
 		"%{wks.location}/vendor/NVRHI/include",
 		"%{wks.location}/vendor/NVRHI/thirdparty/DirectX-Headers/include",
 		"%{wks.location}/vendor/NVRHI/thirdparty/Vulkan-Headers/include",
-		
-		"%{wks.location}/vendor/tracy/tracy",
     }
 
     links
@@ -34,6 +34,7 @@ project "Epoch"
 		"GLFW",
 		"NVRHI",
 		"Tracy",
+		"yaml-cpp",
     }
 
 	filter "configurations:Debug or configurations:Release"
@@ -61,4 +62,4 @@ project "Epoch"
 			"GLFW_INCLUDE_NONE",
 		}
 
-	defines { "_CRT_SECURE_NO_WARNINGS", "SPDLOG_USE_STD_FORMAT" }
+	defines { "_CRT_SECURE_NO_WARNINGS", "SPDLOG_USE_STD_FORMAT", "YAML_CPP_STATIC_DEFINE" }

@@ -22,6 +22,7 @@ project "App"
 		"%{wks.location}/Epoch/src",
 		"%{wks.location}/vendor/spdlog/include",
 		"%{wks.location}/vendor/tracy/tracy",
+		"%{wks.location}/vendor/yaml-cpp/include",
     }
 
     links

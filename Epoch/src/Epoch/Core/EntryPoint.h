@@ -1,3 +1,4 @@
+#include <Epoch/Core/Paths.h>
 #include <Epoch/Debug/Log.h>
 
 void Main(int aArgc, char** aArgv);
@@ -13,6 +14,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 int main(int argc, const char** argv)
 #endif
 {
+    Epoch::Paths::Init();
     Epoch::Log::Init();
 
     /*if (__argc > 1)

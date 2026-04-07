@@ -7,9 +7,9 @@ namespace Epoch
         None,
         Vulkan,
         D3D12,
-        Metal,
-        GNM,
-        NVN
+        //Metal,
+        //GNM,
+        //NVN
     };
 
     struct RendererDesc

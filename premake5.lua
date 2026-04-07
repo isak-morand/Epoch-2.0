@@ -54,6 +54,7 @@ workspace "Epoch"
 		--include "CommonUtilities"
 		include "deps/glfw"
 		include "vendor/tracy"
+		include "deps/yaml-cpp"
 	group ""
 
 	group "Dependencies/NVRHI"

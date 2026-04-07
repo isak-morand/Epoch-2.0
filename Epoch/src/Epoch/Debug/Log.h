@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_map>
 #include <spdlog/spdlog.h>
 #include "Assert.h"
 
@@ -21,7 +22,13 @@ namespace Epoch
 	class Log
 	{
 	public:
-		enum class Level : uint8_t { Debug, Info, Warn, Error, Fatal };
+		enum class Level : uint8_t { Trace, Info, Warn, Error, Fatal };
+		
+		struct TagDetails
+		{
+			bool enabled = true;
+			Level levelFilter = Level::Info;
+		};
 
 	public:
 		static void Init();
@@ -34,12 +41,21 @@ namespace Epoch
 		static void PrintAssertMessage(const char* aCondition, const char* aFile, int aLine, const char* aFunction, std::format_string<Args...> aMessage, Args&&... aArgs);
 
 	private:
+		static TagDetails& GetTagDetails(LogTag aTag);
+
+		static void SetDefaultTagSettings();
+		static void LoadTagSettings();
+		static void SaveTagSettings();
+
+	private:
 		inline static std::shared_ptr<spdlog::logger> s_AsyncLogger;
 		inline static std::shared_ptr<spdlog::logger> s_SyncLogger;
+
+		inline static std::unordered_map<std::string, TagDetails> s_TagDetails;
 	};
 }
 
-#define LOG_DEBUG(LogTag, ...)		::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Debug, LogTag, __VA_ARGS__)
+#define LOG_TRACE(LogTag, ...)		::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Trace, LogTag, __VA_ARGS__)
 #define LOG_INFO(LogTag, ...)		::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Info, LogTag, __VA_ARGS__)
 #define LOG_WARNING(LogTag, ...)	::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Warn, LogTag, __VA_ARGS__)
 #define LOG_ERROR(LogTag, ...)		::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Error, LogTag, __VA_ARGS__)
@@ -48,17 +64,25 @@ namespace Epoch
 namespace Epoch
 {
 	template<typename... Args>
-	void Log::PrintMessageTag(Log::Level aLevel, LogTag aTag, std::format_string<Args...> aFormat, Args&&... aArgs)
+	void Log::PrintMessageTag(Level aLevel, LogTag aTag, std::format_string<Args...> aFormat, Args&&... aArgs)
 	{
 		EPOCH_ASSERT(s_AsyncLogger, "Logger used before initialization!");
 
+		auto& tagDetails = GetTagDetails(aTag);
+
+		if (!tagDetails.enabled || aLevel < tagDetails.levelFilter)
+		{
+			return;
+		}
+
+		const std::string message = std::format(aFormat, std::forward<Args>(aArgs)...);
 		switch (aLevel)
 		{
-		case Level::Debug: s_AsyncLogger->trace("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
-		case Level::Info:  s_AsyncLogger->info("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
-		case Level::Warn:  s_AsyncLogger->warn("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
-		case Level::Error: s_AsyncLogger->error("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
-		case Level::Fatal: s_AsyncLogger->critical("[{}] {}", aTag.name, std::format(aFormat, std::forward<Args>(aArgs)...)); break;
+		case Level::Trace: s_AsyncLogger->trace("[{}] {}", aTag.name, message); break;
+		case Level::Info:  s_AsyncLogger->info("[{}] {}", aTag.name, message); break;
+		case Level::Warn:  s_AsyncLogger->warn("[{}] {}", aTag.name, message); break;
+		case Level::Error: s_AsyncLogger->error("[{}] {}", aTag.name, message); break;
+		case Level::Fatal: s_AsyncLogger->critical("[{}] {}", aTag.name, message); break;
 		}
 	}
 
