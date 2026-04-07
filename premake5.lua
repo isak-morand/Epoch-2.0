@@ -12,14 +12,13 @@ workspace "Epoch"
 	
 	language "C++"
 	cppdialect "C++20"
+	staticruntime "Off"
 	
 	configurations { "Debug", "Release", "Dist" }
 	systemversion "latest"
 	
 	multiprocessorcompile ("On")
-
-	staticruntime "Off"
-
+	
 	filter "configurations:Debug"
     	runtime "Debug"
 

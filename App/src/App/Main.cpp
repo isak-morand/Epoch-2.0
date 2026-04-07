@@ -1,6 +1,6 @@
 #include <Epoch/Core/EntryPoint.h>
-#include "App.h"
 #include <Epoch/Core/Engine.h>
+#include "App.h"
 
 void Main(int aArgc, char** aArgv)
 {
@@ -8,7 +8,7 @@ void Main(int aArgc, char** aArgv)
     desc.window.title = "Test app";
     //desc.window.startBorderless = true;
     //desc.window.startFullscreen = true;
-    desc.window.startMaximized = true;
+    //desc.window.startMaximized = true;
     desc.renderer.graphicsAPI = Epoch::GraphicsAPI::D3D12;
 
     Epoch::Engine engine(desc);
