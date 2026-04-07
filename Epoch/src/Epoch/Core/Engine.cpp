@@ -15,7 +15,12 @@ namespace Epoch
 		s_Instance = this;
 
 		m_Window = Window::Create(aDesc.window);
-		m_Window->SetEventCallback([this](Event& aEvent) { OnEvent(aEvent); });
+
+		auto eventcallback = [this](Event& aEvent)
+		{
+			OnEvent(aEvent);
+		};
+		m_Window->SetEventCallback(eventcallback);
 
 		m_Renderer = std::make_unique<Renderer>(m_Window.get(), aDesc.renderer);
 	}
@@ -36,13 +41,16 @@ namespace Epoch
 			m_Application->OnStart();
 		}
 
-		std::thread renderThread([this]() {
+		auto renderFunc = [this](int x)
+		{
 			while (m_IsRunning)
 			{
 				EPOCH_PROFILE_SCOPE("Render Thread");
 				m_Renderer->Render();
 			}
-			});
+		};
+
+		std::thread renderThread(renderFunc);
 
 		m_IsRunning = true;
 		while (m_IsRunning)
@@ -82,11 +90,11 @@ namespace Epoch
 		{
 			dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 			dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
-			//dispatcher.Dispatch<WindowMinimizeEvent>(BIND_EVENT_FN(OnWindowMinimiz));
+			// dispatcher.Dispatch<WindowMinimizeEvent>(BIND_EVENT_FN(OnWindowMinimiz));
 		}
 		else if (aEvent.IsInCategory(EventCategory::Input))
 		{
-			//Input::OnEvent(aEvent);
+			// Input::OnEvent(aEvent);
 		}
 	}
 

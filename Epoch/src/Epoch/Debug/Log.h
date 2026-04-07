@@ -10,44 +10,51 @@ struct LogTag
 
 namespace LogTags
 {
-	inline constexpr LogTag Core{ "Core" };
-	inline constexpr LogTag Renderer{ "Renderer" };
-	inline constexpr LogTag Asset{ "Asset" };
-	inline constexpr LogTag Physics{ "Physics" };
-	inline constexpr LogTag Audio{ "Audio" };
+	inline constexpr LogTag Core{"Core"};
+	inline constexpr LogTag Renderer{"Renderer"};
+	inline constexpr LogTag Asset{"Asset"};
+	inline constexpr LogTag Physics{"Physics"};
+	inline constexpr LogTag Audio{"Audio"};
 }
 
 namespace Epoch
 {
 	class Log
 	{
-	public:
-		enum class Level : uint8_t { Trace, Info, Warn, Error, Fatal };
-		
+	  public:
+		enum class Level : uint8_t
+		{
+			Trace,
+			Info,
+			Warn,
+			Error,
+			Fatal
+		};
+
 		struct TagDetails
 		{
 			bool enabled = true;
 			Level levelFilter = Level::Info;
 		};
 
-	public:
+	  public:
 		static void Init();
 		static void ShutDown();
 
-		template<typename... Args>
+		template <typename... Args>
 		static void PrintMessageTag(Log::Level aLevel, LogTag aTag, std::format_string<Args...> aFormat, Args&&... aArgs);
 
-		template<typename... Args>
+		template <typename... Args>
 		static void PrintAssertMessage(const char* aCondition, const char* aFile, int aLine, const char* aFunction, std::format_string<Args...> aMessage, Args&&... aArgs);
 
-	private:
+	  private:
 		static TagDetails& GetTagDetails(LogTag aTag);
 
 		static void SetDefaultTagSettings();
 		static void LoadTagSettings();
 		static void SaveTagSettings();
 
-	private:
+	  private:
 		inline static std::shared_ptr<spdlog::logger> s_AsyncLogger;
 		inline static std::shared_ptr<spdlog::logger> s_SyncLogger;
 
@@ -55,15 +62,15 @@ namespace Epoch
 	};
 }
 
-#define LOG_TRACE(LogTag, ...)		::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Trace, LogTag, __VA_ARGS__)
-#define LOG_INFO(LogTag, ...)		::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Info, LogTag, __VA_ARGS__)
-#define LOG_WARNING(LogTag, ...)	::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Warn, LogTag, __VA_ARGS__)
-#define LOG_ERROR(LogTag, ...)		::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Error, LogTag, __VA_ARGS__)
-#define LOG_FATAL(LogTag, ...)		::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Fatal, LogTag, __VA_ARGS__)
+#define LOG_TRACE(LogTag, ...) ::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Trace, LogTag, __VA_ARGS__)
+#define LOG_INFO(LogTag, ...) ::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Info, LogTag, __VA_ARGS__)
+#define LOG_WARNING(LogTag, ...) ::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Warn, LogTag, __VA_ARGS__)
+#define LOG_ERROR(LogTag, ...) ::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Error, LogTag, __VA_ARGS__)
+#define LOG_FATAL(LogTag, ...) ::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Fatal, LogTag, __VA_ARGS__)
 
 namespace Epoch
 {
-	template<typename... Args>
+	template <typename... Args>
 	void Log::PrintMessageTag(Level aLevel, LogTag aTag, std::format_string<Args...> aFormat, Args&&... aArgs)
 	{
 		EPOCH_ASSERT(s_AsyncLogger, "Logger used before initialization!");
@@ -79,14 +86,14 @@ namespace Epoch
 		switch (aLevel)
 		{
 		case Level::Trace: s_AsyncLogger->trace("[{}] {}", aTag.name, message); break;
-		case Level::Info:  s_AsyncLogger->info("[{}] {}", aTag.name, message); break;
-		case Level::Warn:  s_AsyncLogger->warn("[{}] {}", aTag.name, message); break;
+		case Level::Info: s_AsyncLogger->info("[{}] {}", aTag.name, message); break;
+		case Level::Warn: s_AsyncLogger->warn("[{}] {}", aTag.name, message); break;
 		case Level::Error: s_AsyncLogger->error("[{}] {}", aTag.name, message); break;
 		case Level::Fatal: s_AsyncLogger->critical("[{}] {}", aTag.name, message); break;
 		}
 	}
 
-	template<typename ...Args>
+	template <typename... Args>
 	inline void Log::PrintAssertMessage(const char* aCondition, const char* aFile, int aLine, const char* aFunction, std::format_string<Args...> aMessage, Args&&... aArgs)
 	{
 		const std::string userMessage = std::format(aMessage, std::forward<Args>(aArgs)...);

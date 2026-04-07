@@ -19,11 +19,9 @@ namespace Epoch
 		LoadTagSettings();
 
 		auto logPath = Epoch::Paths::GetLogDir() / "Epoch.log";
-		std::vector<spdlog::sink_ptr> epochSinks =
-		{
+		std::vector<spdlog::sink_ptr> epochSinks{
 			std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/Epoch.log", true),
-			std::make_shared<spdlog::sinks::stdout_color_sink_mt>()
-		};
+			std::make_shared<spdlog::sinks::stdout_color_sink_mt>()};
 
 		epochSinks[0]->set_pattern("[%T] %l: %v%");
 		epochSinks[1]->set_pattern("%^[%T] %v%$");
@@ -70,8 +68,8 @@ namespace Epoch
 			switch (aLevel)
 			{
 			case Log::Level::Trace: return "Trace";
-			case Log::Level::Info:  return "Info";
-			case Log::Level::Warn:  return "Warn";
+			case Log::Level::Info: return "Info";
+			case Log::Level::Warn: return "Warn";
 			case Log::Level::Error: return "Error";
 			case Log::Level::Fatal: return "Fatal";
 			}
@@ -81,8 +79,8 @@ namespace Epoch
 		Log::Level LevelFromString(const std::string& aLevel)
 		{
 			if (aLevel == "Trace") return Log::Level::Trace;
-			if (aLevel == "Info")  return Log::Level::Info;
-			if (aLevel == "Warn")  return Log::Level::Warn;
+			if (aLevel == "Info") return Log::Level::Info;
+			if (aLevel == "Warn") return Log::Level::Warn;
 			if (aLevel == "Error") return Log::Level::Error;
 			if (aLevel == "Fatal") return Log::Level::Fatal;
 
