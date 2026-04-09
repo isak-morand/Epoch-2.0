@@ -1,53 +1,60 @@
---function apply_simd_flags()
---    filter { "configurations:Release or configurations:Dist" }
---        vectorextensions "AVX2"
---        isaextensions { "BMI", "POPCNT", "LZCNT", "F16C" }
---    filter {}
---end
-
 workspace "Epoch"
 	startproject "App"
 
+	configurations { "Debug", "Release", "Dist" }
 	architecture "x64"
 	
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "Off"
 	
-	configurations { "Debug", "Release", "Dist" }
-	systemversion "latest"
-	
 	multiprocessorcompile ("On")
 	
-	filter "configurations:Debug"
-    	runtime "Debug"
-
-	filter "configurations:Release or configurations:Dist"
-    	runtime "Release"
+-- ========================
+-- Platform-specific
+-- ========================
 
 	filter "system:windows"
-		defines { "EPOCH_WIN32" }
-		buildoptions { "/Zc:preprocessor", "/Zc:__cplusplus" }
+		defines { "EPOCH_PLATFORM_WINDOWS" }
+		systemversion "latest"
+    	buildoptions { "/Zc:preprocessor", "/Zc:__cplusplus" }
 		
+	filter "system:linux"
+    	defines { "EPOCH_PLATFORM_LINUX" }
+    	--pic "On"
+
+-- ========================
+-- Configurations
+-- ========================
+
 	filter "configurations:Debug"
 		defines { "_DEBUG" }
+    	runtime "Debug"
 		optimize "Off"
-		symbols "on"
+		symbols "On"
 		
 	filter "configurations:Release"
 		defines { "_RELEASE", "NDEBUG" }
+    	runtime "Release"
 		optimize "On"
-		symbols "default"
+		symbols "Default"
 		
 	filter "configurations:Dist"
 		defines { "_DIST", "NDEBUG" }
+    	runtime "Release"
 		optimize "Full"
-		symbols "off"
+		symbols "Off"
+		
+	filter {}
+
+-- ========================
+-- Projects
+-- ========================
 
 	outputdir = "%{cfg.buildcfg}-%{cfg.architecture}"
 
-	include "Epoch"
-	include "App"
+	include "source/Epoch"
+	include "source/App"
 
 	group "Dependencies"
 		--include "CommonUtilities"
