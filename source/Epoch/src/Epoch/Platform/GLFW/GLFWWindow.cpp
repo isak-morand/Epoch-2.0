@@ -8,6 +8,8 @@
 #endif
 
 #include "Epoch/Events/WindowEvents.h"
+#include "Epoch/Events/MouseEvents.h"
+#include "Epoch/Events/KeyEvents.h"
 
 namespace Epoch::GLFW
 {
@@ -41,19 +43,19 @@ namespace Epoch::GLFW
 		static void KeyCallback_GLFW(GLFWwindow* window, int key, int scancode, int action, int mods)
 		{
 			GLFWWindow* win = (GLFWWindow*)glfwGetWindowUserPointer(window);
-			//win->KeyCallback((KeyCode)key);
+			win->KeyCallback(key, scancode, action, mods);
 		}
 
 		static void MouseButtonCallback_GLFW(GLFWwindow* window, int button, int action, int mods)
 		{
 			GLFWWindow* win = (GLFWWindow*)glfwGetWindowUserPointer(window);
-			//win->MouseButtonCallback((KeyCode)key);
+			win->MouseButtonCallback(button, action, mods);
 		}
 
 		static void ScrollCallback_GLFW(GLFWwindow* window, double xoffset, double yoffset)
 		{
 			GLFWWindow* win = (GLFWWindow*)glfwGetWindowUserPointer(window);
-			//win->ScrollCallback((KeyCode)key);
+			win->ScrollCallback(xoffset, yoffset);
 		}
 	}
 
@@ -110,8 +112,6 @@ namespace Epoch::GLFW
 
 		glfwShowWindow(m_Window);
 
-		glfwSetWindowUserPointer(m_Window, this);
-
 		if (glfwRawMouseMotionSupported())
 		{
 			glfwSetInputMode(m_Window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -121,15 +121,14 @@ namespace Epoch::GLFW
 			LOG_WARNING(LOG_TAG, "Raw mouse motion not supported.");
 		}
 
-		//Callbacks
-		{
-			glfwSetWindowCloseCallback(m_Window, WindowCloseCallback_GLFW);
-			glfwSetWindowSizeCallback(m_Window, WindowSizeCallback_GLFW);
-			glfwSetWindowIconifyCallback(m_Window, WindowIconifyCallback_GLFW);
-			glfwSetKeyCallback(m_Window, KeyCallback_GLFW);
-			glfwSetMouseButtonCallback(m_Window, MouseButtonCallback_GLFW);
-			glfwSetScrollCallback(m_Window, ScrollCallback_GLFW);
-		}
+		glfwSetWindowUserPointer(m_Window, this);
+
+		glfwSetWindowCloseCallback(m_Window, WindowCloseCallback_GLFW);
+		glfwSetWindowSizeCallback(m_Window, WindowSizeCallback_GLFW);
+		glfwSetWindowIconifyCallback(m_Window, WindowIconifyCallback_GLFW);
+		glfwSetKeyCallback(m_Window, KeyCallback_GLFW);
+		glfwSetMouseButtonCallback(m_Window, MouseButtonCallback_GLFW);
+		glfwSetScrollCallback(m_Window, ScrollCallback_GLFW);
 
 		LOG_INFO(LOG_TAG, "Window created: {} ({}, {})", m_Title, m_Width, m_Height);
 	}
@@ -186,14 +185,14 @@ namespace Epoch::GLFW
 		{
 		case GLFW_PRESS:
 		{
-			//KeyPressedEvent event((KeyCode)aKey);
-			//m_EventCallback(event);
+			KeyPressedEvent event((KeyCode)aKey);
+			m_EventCallback(event);
 			break;
 		}
 		case GLFW_RELEASE:
 		{
-			//KeyReleasedEvent event((KeyCode)aKey);
-			//m_EventCallback(event);
+			KeyReleasedEvent event((KeyCode)aKey);
+			m_EventCallback(event);
 			break;
 		}
 		}
@@ -205,14 +204,14 @@ namespace Epoch::GLFW
 		{
 		case GLFW_PRESS:
 		{
-			//MouseButtonPressedEvent event((MouseButton)aButton);
-			//m_EventCallback(event);
+			MouseButtonPressedEvent event((MouseButton)aButton);
+			m_EventCallback(event);
 			break;
 		}
 		case GLFW_RELEASE:
 		{
-			//MouseButtonReleasedEvent event((MouseButton)aButton);
-			//m_EventCallback(event);
+			MouseButtonReleasedEvent event((MouseButton)aButton);
+			m_EventCallback(event);
 			break;
 		}
 		}
@@ -220,7 +219,7 @@ namespace Epoch::GLFW
 
 	void GLFWWindow::ScrollCallback(double aXOffset, double aYOffset)
 	{
-		//MouseScrolledEvent event((float)aXOffset, (float)aYOffset);
-		//m_EventCallback(event);
+		MouseScrolledEvent event((float)aXOffset, (float)aYOffset);
+		m_EventCallback(event);
 	}
 }

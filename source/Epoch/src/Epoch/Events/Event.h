@@ -7,8 +7,8 @@ namespace Epoch
 	{
 		None,
 		WindowClose, WindowMinimize, WindowResize,
-		KeyPressed, KeyReleased, KeyTyped,
-		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
+		KeyPressed, KeyReleased,
+		MouseButtonPressed, MouseButtonReleased, MouseScrolled
 	};
 
 	enum class EventCategory
@@ -20,6 +20,11 @@ namespace Epoch
 		Mouse = 1 << 3,
 		MouseButton = 1 << 4
 	};
+
+	inline EventCategory operator|(EventCategory a, EventCategory b)
+	{
+		return static_cast<EventCategory>(static_cast<int>(a) | static_cast<int>(b));
+	}
 
 #define EVENT_CLASS_TYPE(aType) static EventType GetStaticType() { return EventType::aType; }\
 								EventType GetEventType() const override { return GetStaticType(); }

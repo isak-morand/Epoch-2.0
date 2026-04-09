@@ -1,9 +1,9 @@
 #pragma once
 
-#ifdef EPOCH_PLATFORM_WINDOWS
-#include <Windows.h>
-#include <shellapi.h>
-#endif
+//#ifdef EPOCH_PLATFORM_WINDOWS
+//#include <Windows.h>
+//#include <shellapi.h>
+//#endif
 
 #include <algorithm>
 #include <array>
