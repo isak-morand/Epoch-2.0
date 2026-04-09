@@ -21,7 +21,6 @@ namespace Epoch
 		//case Epoch::GraphicsAPI::NVN:		return std::make_unique<NVNDevice>(aDesc);
 		}
 
-		LOG_FATAL(LOG_TAG, "Can't create render device. Unknown graphics API!");
 		return nullptr;
 	}
 
