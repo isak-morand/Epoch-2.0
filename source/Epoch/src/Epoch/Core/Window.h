@@ -28,8 +28,12 @@ namespace Epoch
 
 		void SetEventCallback(const EventCallbackFn& aCallback) { m_EventCallback = aCallback; }
 
+		std::string_view GetTitle() const { return m_Title; }
+
 		uint32_t GetWidth() const { return m_Width; }
 		uint32_t GetHeight() const { return m_Height; }
+
+		bool IsMinimized() const { return myIsMinimized; }
 
 		virtual void PollEvents() = 0;
 
@@ -44,9 +48,8 @@ namespace Epoch
 		std::string m_Title = "";
 		uint32_t m_Width = 0;
 		uint32_t m_Height = 0;
+		bool myIsMinimized = false;
 
 		EventCallbackFn m_EventCallback;
-
-		bool myIsMinimized = false;
 	};
 }

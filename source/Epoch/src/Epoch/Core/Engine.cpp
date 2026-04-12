@@ -36,12 +36,15 @@ namespace Epoch
 			m_Application->OnStart();
 		}
 
-		std::thread renderThread([this]() {
-			while (m_IsRunning)
+		std::thread renderThread([this]()
 			{
-				EPOCH_PROFILE_SCOPE("Render Thread");
-				m_Renderer->Render();
-			}
+				while (m_IsRunning)
+				{
+					if (m_Window->IsMinimized()) continue;
+
+					EPOCH_PROFILE_SCOPE("Render Thread");
+					m_Renderer->Render();
+				}
 			});
 
 		m_IsRunning = true;

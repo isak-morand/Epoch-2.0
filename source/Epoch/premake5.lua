@@ -1,23 +1,24 @@
 project "Epoch"
 	kind "StaticLib"
 
-    targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
 	pchheader "epch.h"
 	pchsource "src/epch.cpp"
 
-    files
+	files
 	{
 		"src/**.h",
 		"src/**.hpp",
 		"src/**.cpp"
 	}
 
-    includedirs
+	includedirs
 	{
-        "src",
-		--"%{wks.location}/CommonUtilities/src",
+		"src",
+		"%{wks.location}/source/CommonUtilities/src",
+
 		"%{wks.location}/vendor/spdlog/include",
 		"%{wks.location}/vendor/glfw/include",
 		"%{wks.location}/vendor/tracy/tracy",
@@ -26,11 +27,12 @@ project "Epoch"
 		"%{wks.location}/vendor/NVRHI/include",
 		"%{wks.location}/vendor/NVRHI/thirdparty/DirectX-Headers/include",
 		"%{wks.location}/vendor/NVRHI/thirdparty/Vulkan-Headers/include",
-    }
+	}
 
-    links
+	links
 	{
-        --"CommonUtilities",
+		"CommonUtilities",
+
 		"GLFW",
 		"NVRHI",
 		"Tracy",
@@ -46,16 +48,16 @@ project "Epoch"
 		}
 
 	filter "configurations:Debug"
-    	defines { "EPOCH_DEBUG" }
+		defines { "EPOCH_DEBUG" }
 
 	filter "configurations:Release"
-    	defines { "EPOCH_RELEASE" }
+		defines { "EPOCH_RELEASE" }
 
 	filter "configurations:Dist"
-    	defines { "EPOCH_DIST" }
+		defines { "EPOCH_DIST" }
 
 	filter "system:windows"
-   		defines
+		defines
 		{
 			"WIN32_LEAN_AND_MEAN",
 			"NOMINMAX",

@@ -55,9 +55,9 @@ workspace "Epoch"
 
 	include "source/Epoch"
 	include "source/App"
+	include "source/CommonUtilities"
 
 	group "Dependencies"
-		--include "CommonUtilities"
 		include "deps/glfw"
 		include "vendor/tracy"
 		include "deps/yaml-cpp"

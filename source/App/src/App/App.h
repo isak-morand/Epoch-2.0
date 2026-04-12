@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <Epoch/Core/Application.h>
 
 namespace Epoch
@@ -21,6 +22,7 @@ public:
 
 private:
 	bool OnWindowClose(Epoch::WindowCloseEvent& aEvent);
+	void UpdateWindowTitle(const std::string& aTitle);
 
 private:
 

@@ -6,30 +6,31 @@ project "App"
 	
 	targetname ("App")
 
-    targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
-    files
+	files
 	{
 		"src/**.h",
 		"src/**.hpp",
 		"src/**.cpp"
 	}
 
-    includedirs
+	includedirs
 	{
-        "src",
+		"src",
 		"%{wks.location}/source/Epoch/src",
+		"%{wks.location}/source/CommonUtilities/src",
+
 		"%{wks.location}/vendor/spdlog/include",
 		"%{wks.location}/vendor/tracy/tracy",
 		"%{wks.location}/vendor/yaml-cpp/include",
-    }
+	}
 
-    links
+	links
 	{
-        --"CommonUtilities",
 		"Epoch",
-    }
+	}
 	
 	defines { "_CRT_SECURE_NO_WARNINGS", "SPDLOG_USE_STD_FORMAT" }
 	
@@ -40,5 +41,4 @@ project "App"
 			"TRACY_ON_DEMAND",
 			"TRACY_CALLSTACK=10"
 		}
-
 	

@@ -6,21 +6,11 @@
 
 #include <chrono>
 
-App::App()
-{
-}
+App::App() {}
+App::~App() {}
 
-App::~App()
-{
-}
-
-void App::OnStart()
-{
-}
-
-void App::OnShutdown()
-{
-}
+void App::OnStart() {}
+void App::OnShutdown() {}
 
 void App::OnUpdate(float aDeltaTime)
 {
@@ -37,13 +27,13 @@ void App::OnUpdate(float aDeltaTime)
 
 	if (totalTime >= 0.5)
 	{
-		uint32_t cpuFPS = frames / totalTime;
+		uint32_t cpuFPS = (uint32_t)(frames / totalTime);
 
 		float gpuFrameTime = Epoch::Engine::Get()->GetRenderer()->GetAverageFrameTime();
-		uint32_t gpuFPS = 1.0f / gpuFrameTime;
+		uint32_t gpuFPS = (uint32_t)(1.0f / gpuFrameTime);
 
 		std::string title = std::format("Epoch <{}> {} cpu, {} gpu", "d3d12", cpuFPS, gpuFPS);
-		Epoch::Engine::Get()->GetWindow()->SetTitle(title);
+		UpdateWindowTitle(title);
 
 		totalTime -= 0.5f;
 		frames = 0;
@@ -60,4 +50,9 @@ bool App::OnWindowClose(Epoch::WindowCloseEvent& aEvent)
 {
 	Epoch::Engine::Get()->Stop();
 	return true;
+}
+
+void App::UpdateWindowTitle(const std::string& aTitle)
+{
+	Epoch::Engine::Get()->GetWindow()->SetTitle(aTitle);
 }
