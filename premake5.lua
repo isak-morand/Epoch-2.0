@@ -1,7 +1,7 @@
 workspace "Epoch"
 	startproject "App"
 
-	configurations { "Debug", "Release", "Dist" }
+	configurations { "Debug", "Develop", "Release" }
 	architecture "x64"
 	
 	language "C++"
@@ -33,14 +33,14 @@ workspace "Epoch"
 		optimize "Off"
 		symbols "On"
 		
-	filter "configurations:Release"
-		defines { "_RELEASE", "NDEBUG" }
+	filter "configurations:Develop"
+		defines { "_DEVELOP", "NDEBUG" }
     	runtime "Release"
 		optimize "On"
 		symbols "Default"
 		
-	filter "configurations:Dist"
-		defines { "_DIST", "NDEBUG" }
+	filter "configurations:Release"
+		defines { "_RELEASE", "NDEBUG" }
     	runtime "Release"
 		optimize "Full"
 		symbols "Off"

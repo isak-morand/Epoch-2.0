@@ -57,7 +57,7 @@ namespace Epoch
 
 #define LOG_TRACE(LogTag, ...)		::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Trace, LogTag, __VA_ARGS__)
 #define LOG_INFO(LogTag, ...)		::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Info, LogTag, __VA_ARGS__)
-#define LOG_WARNING(LogTag, ...)	::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Warn, LogTag, __VA_ARGS__)
+#define LOG_WARN(LogTag, ...)	::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Warn, LogTag, __VA_ARGS__)
 #define LOG_ERROR(LogTag, ...)		::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Error, LogTag, __VA_ARGS__)
 #define LOG_FATAL(LogTag, ...)		::Epoch::Log::PrintMessageTag(::Epoch::Log::Level::Fatal, LogTag, __VA_ARGS__)
 

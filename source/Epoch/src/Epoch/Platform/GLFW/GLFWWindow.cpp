@@ -118,7 +118,7 @@ namespace Epoch::GLFW
 		}
 		else
 		{
-			LOG_WARNING(LOG_TAG, "Raw mouse motion not supported.");
+			LOG_WARN(LOG_TAG, "Raw mouse motion not supported.");
 		}
 
 		glfwSetWindowUserPointer(m_Window, this);

@@ -7,7 +7,7 @@ namespace Epoch
 	{
 	public:
 		VKDeviceManager();
-		~VKDeviceManager();
+		~VKDeviceManager() override;
 
 		void DestroyDeviceAndSwapChain() override;
 

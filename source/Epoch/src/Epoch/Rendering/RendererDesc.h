@@ -15,5 +15,7 @@ namespace Epoch
 	struct RendererDesc
 	{
 		GraphicsAPI graphicsAPI = GraphicsAPI::None;
+
+
 	};
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef _DIST
+#ifndef _RELEASE
 #include <tracy/Tracy.hpp>
 #define EPOCH_PROFILE_MARK_FRAME	FrameMark
 #define EPOCH_PROFILE_FUNC(...)		ZoneScoped##__VA_OPT__(N(__VA_ARGS__))

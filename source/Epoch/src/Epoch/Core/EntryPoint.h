@@ -1,17 +1,35 @@
 #include <Epoch/Core/Paths.h>
 #include <Epoch/Debug/Log.h>
 
-void Main(int aArgc, char** aArgv);
 extern void Main(int aArgc, char** aArgv);
 
-#if defined(EPOCH_PLATFORM_WINDOWS) && defined(_DIST)  
+#ifdef EPOCH_PLATFORM_WINDOWS
+static void AddDllSearchPath()
+{
+	SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+
+	wchar_t buffer[MAX_PATH];
+	GetModuleFileNameW(NULL, buffer, MAX_PATH);
+
+	std::filesystem::path exePath(buffer);
+	auto libPath = exePath.parent_path() / L"lib";
+
+	AddDllDirectory(libPath.c_str());
+}
+#endif
+
+#if defined(EPOCH_PLATFORM_WINDOWS) && defined(_RELEASE)  
 #include <windows.h>
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 #else
-int main(int argc, const char** argv)
+int main()
 #endif
 {
+#ifdef EPOCH_PLATFORM_WINDOWS
+	AddDllSearchPath();
+#endif
+
 	Epoch::Paths::Init();
 	Epoch::Log::Init();
 

@@ -13,7 +13,7 @@ namespace Epoch
 	{
 	public:
 		DX12DeviceManager();
-		~DX12DeviceManager();
+		~DX12DeviceManager() override;
 
 		void DestroyDeviceAndSwapChain() override;
 
@@ -69,6 +69,11 @@ namespace Epoch
 		bool											m_ShouldResize = false;
 
 		nvrhi::DeviceHandle								m_NvrhiDevice;
+
 		nvrhi::CommandListHandle						m_CommandList;
+
+		nvrhi::ShaderHandle								m_VertexShader;
+		nvrhi::ShaderHandle								m_PixelShader;
+		nvrhi::GraphicsPipelineHandle					m_Pipeline;
 	};
 }

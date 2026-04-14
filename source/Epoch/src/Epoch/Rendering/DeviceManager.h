@@ -25,8 +25,6 @@ namespace Epoch
 
 		virtual void Render() {}
 
-		virtual nvrhi::DeviceHandle GetDevice() { return nullptr; }
-
 	protected:
 		DeviceManager();
 

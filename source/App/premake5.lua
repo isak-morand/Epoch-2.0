@@ -1,6 +1,6 @@
 project "App"
 	kind "ConsoleApp"
-	filter { "system:windows", "configurations:Dist" }
+	filter { "system:windows", "configurations:Release" }
 		kind "WindowedApp"
 	filter {}
 	
@@ -42,3 +42,18 @@ project "App"
 			"TRACY_CALLSTACK=10"
 		}
 	
+
+	filter "system:windows"
+    	postbuildcommands
+		{
+		    "{MKDIR} \"%{cfg.buildtarget.directory}lib\"",
+		    "{COPYFILE} \"%{wks.location}vendor/dxc/windows/bin/x64/dxcompiler.dll\" \"%{cfg.buildtarget.directory}lib/dxcompiler.dll\""
+		}
+
+	filter "system:linux"
+    	buildoptions { "-Wl,-rpath,$ORIGIN/lib" }
+    	postbuildcommands
+    	{
+		    "{MKDIR} \"%{cfg.buildtarget.directory}lib\"",
+    	    "{COPYFILE} \"%{wks.location}vendor/dxc/linux/lib/libdxcompiler.so\" \"%{cfg.buildtarget.directory}lib/libdxcompiler.so\""
+    	}

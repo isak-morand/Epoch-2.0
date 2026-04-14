@@ -63,5 +63,37 @@ project "Epoch"
 			"NOMINMAX",
 			"GLFW_INCLUDE_NONE",
 		}
-
+		
 	defines { "_CRT_SECURE_NO_WARNINGS", "SPDLOG_USE_STD_FORMAT", "YAML_CPP_STATIC_DEFINE" }
+
+	filter "system:windows"
+    	includedirs
+    	{
+    	    "%{wks.location}/vendor/dxc/windows/include",
+    	}
+
+    	libdirs
+    	{
+    	    "%{wks.location}/vendor/dxc/windows/lib",
+    	}
+
+    	links
+    	{
+    	    "dxcompiler"
+    	}
+
+	filter "system:linux"
+    	includedirs
+    	{
+    	    "%{wks.location}/vendor/dxc/linux/include",
+    	}
+
+    	libdirs
+    	{
+    	    "%{wks.location}/vendor/dxc/linux/lib",
+    	}
+
+    	links
+    	{
+    	    "dxcompiler" -- links libdxcompiler.so
+    	}
