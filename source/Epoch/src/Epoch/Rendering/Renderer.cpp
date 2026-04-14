@@ -8,7 +8,7 @@ namespace Epoch
 	{
 		m_DeviceManager = DeviceManager::Create(aDesc.graphicsAPI);
 		EPOCH_VERIFY(m_DeviceManager, "Failed to create device manager!");
-		EPOCH_VERIFY(m_DeviceManager->CreateDeviceAndSwapChain(aWindow), "Failed to create device and or swap chain!");
+		EPOCH_VERIFY(m_DeviceManager->CreateDeviceAndSwapChain(aDesc, aWindow), "Failed to create device and or swap chain!");
 	}
 
 	Renderer::~Renderer()

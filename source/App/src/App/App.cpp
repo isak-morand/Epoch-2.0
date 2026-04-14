@@ -3,6 +3,7 @@
 #include <Epoch/Events/WindowEvents.h>
 #include <Epoch/Core/Engine.h>
 #include <Epoch/Rendering/Renderer.h>
+#include <Epoch/Rendering/DeviceManager.h>
 
 #include <chrono>
 
@@ -32,7 +33,7 @@ void App::OnUpdate(float aDeltaTime)
 		float gpuFrameTime = Epoch::Engine::Get()->GetRenderer()->GetAverageFrameTime();
 		uint32_t gpuFPS = (uint32_t)(1.0f / gpuFrameTime);
 
-		std::string title = std::format("Epoch <{}> {} cpu, {} gpu", "d3d12", cpuFPS, gpuFPS);
+		std::string title = std::format("Epoch <{}> {} cpu, {} gpu", Epoch::Engine::Get()->GetRenderer()->GetDeviceManager()->GetAPIName(), cpuFPS, gpuFPS);
 		UpdateWindowTitle(title);
 
 		totalTime -= 0.5f;

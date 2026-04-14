@@ -24,8 +24,10 @@ namespace Epoch
 		return nullptr;
 	}
 
-	bool DeviceManager::CreateDeviceAndSwapChain(Window* aWindow)
+	bool DeviceManager::CreateDeviceAndSwapChain(const RendererDesc& aRenderDesc, Window* aWindow)
 	{
+		m_RenderDesc = aRenderDesc;
+
 		if (!CreateInstance())
 		{
 			return false;

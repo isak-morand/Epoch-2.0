@@ -7,6 +7,8 @@ namespace Epoch
 		Vertex,
 		Pixel,
 		Compute,
+
+		Fragment = Pixel,
 	};
 
 	struct ShaderCompileInput

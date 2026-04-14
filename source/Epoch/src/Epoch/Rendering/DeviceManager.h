@@ -2,8 +2,6 @@
 #include <memory>
 #include "RendererDesc.h"
 
-#include <nvrhi/nvrhi.h>
-
 namespace Epoch
 {
 	class Window;
@@ -15,7 +13,7 @@ namespace Epoch
 
 		static std::unique_ptr<DeviceManager> Create(GraphicsAPI aGraphicsAPI);
 
-		bool CreateDeviceAndSwapChain(Window* aWindow);
+		bool CreateDeviceAndSwapChain(const RendererDesc& aRenderDesc, Window* aWindow);
 		virtual void DestroyDeviceAndSwapChain() = 0;
 
 		virtual void OnWindowResize(uint32_t aWidth, uint32_t aHeight) = 0;
@@ -24,6 +22,17 @@ namespace Epoch
 		virtual bool EndFrame() = 0;
 
 		virtual void Render() {}
+
+		GraphicsAPI GetAPI() const { return m_RenderDesc.graphicsAPI; }
+		std::string_view GetAPIName() const
+		{
+			switch (m_RenderDesc.graphicsAPI)
+			{
+			case Epoch::GraphicsAPI::Vulkan:	return "vulkan";
+			case Epoch::GraphicsAPI::D3D12:		return "d3d12";
+			default:							return "UNKNOWN";
+			}
+		}
 
 	protected:
 		DeviceManager();
@@ -34,5 +43,8 @@ namespace Epoch
 
 		virtual uint32_t GetCurrentBackBufferIndex() = 0;
 		virtual uint32_t GetBackBufferCount() = 0;
+
+	protected:
+		RendererDesc m_RenderDesc;
 	};
 }

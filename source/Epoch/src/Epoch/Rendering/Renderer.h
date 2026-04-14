@@ -16,6 +16,7 @@ namespace Epoch
 
 		void Render();
 
+		const DeviceManager* GetDeviceManager() const { return m_DeviceManager.get(); }
 		float GetAverageFrameTime() const { return m_AverageFrameTime; }
 
 	private:

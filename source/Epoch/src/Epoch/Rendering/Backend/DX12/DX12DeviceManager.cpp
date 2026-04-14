@@ -208,8 +208,7 @@ namespace Epoch
 
 	bool DX12DeviceManager::CreateDevice()
 	{
-		//if (m_EnableDebugRuntime)
-		if (false)
+		if (m_RenderDesc.enableDebugRuntime)
 		{
 			Microsoft::WRL::ComPtr<ID3D12Debug> pDebug;
 			HRESULT hr = D3D12GetDebugInterface(IID_PPV_ARGS(pDebug.GetAddressOf()));
@@ -225,21 +224,21 @@ namespace Epoch
 			}
 		}
 
-		//if (m_DeviceParams.enableGPUValidation)
-		//{
-		//	Microsoft::WRL::ComPtr<ID3D12Debug3> debugController3;
-		//	HRESULT hr = D3D12GetDebugInterface(IID_PPV_ARGS(debugController3.GetAddressOf()));
-		//
-		//	if (SUCCEEDED(hr))
-		//	{
-		//		debugController3->SetEnableGPUBasedValidation(true);
-		//		LOG_TRACE(LOG_TAG, "DX12 GPU validation enabled");
-		//	}
-		//	else
-		//	{
-		//		LOG_WARNING(LOG_TAG, "Cannot enable GPU-based validation, ID3D12Debug3 is not available.");
-		//	}
-		//}
+		if (m_RenderDesc.enableGPUValidation)
+		{
+			Microsoft::WRL::ComPtr<ID3D12Debug3> debugController3;
+			HRESULT hr = D3D12GetDebugInterface(IID_PPV_ARGS(debugController3.GetAddressOf()));
+		
+			if (SUCCEEDED(hr))
+			{
+				debugController3->SetEnableGPUBasedValidation(true);
+				LOG_TRACE(LOG_TAG, "DX12 GPU validation enabled");
+			}
+			else
+			{
+				LOG_WARN(LOG_TAG, "Cannot enable GPU-based validation, ID3D12Debug3 is not available.");
+			}
+		}
 
 		int adapterIndex = 0;
 
@@ -273,8 +272,7 @@ namespace Epoch
 			return false;
 		}
 
-		//if (m_EnableDebugRuntime)
-		if (false)
+		if (m_RenderDesc.enableDebugRuntime)
 		{
 			Microsoft::WRL::ComPtr<ID3D12InfoQueue> pInfoQueue;
 			m_Device12->QueryInterface(pInfoQueue.GetAddressOf());
@@ -282,7 +280,7 @@ namespace Epoch
 			if (pInfoQueue)
 			{
 #ifdef _DEBUG
-				//if (m_DeviceParams.enableWarningsAsErrors)
+				if (m_RenderDesc.enableWarningsAsErrors)
 				{
 					pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
 				}
@@ -358,11 +356,10 @@ namespace Epoch
 		m_NvrhiDevice = nvrhi::d3d12::createDevice(deviceDesc);
 
 		//if (m_DeviceParams.enableNvrhiValidationLayer)
-		if (false)
-		{
-			m_NvrhiDevice = nvrhi::validation::createValidationLayer(m_NvrhiDevice);
-			LOG_TRACE(LOG_TAG, "NVRHI validation layer enabled");
-		}
+		//{
+		//	m_NvrhiDevice = nvrhi::validation::createValidationLayer(m_NvrhiDevice);
+		//	LOG_TRACE(LOG_TAG, "NVRHI validation layer enabled");
+		//}
 
 		return true;
 	}
@@ -383,8 +380,8 @@ namespace Epoch
 		m_SwapChainDesc.Height = height;
 		m_SwapChainDesc.SampleDesc.Count = 1;//m_DeviceParams.swapChainSampleCount;
 		m_SwapChainDesc.SampleDesc.Quality = 0;
-		m_SwapChainDesc.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT;//m_DeviceParams.swapChainUsage;
-		m_SwapChainDesc.BufferCount = 3;//m_DeviceParams.swapChainBufferCount;
+		m_SwapChainDesc.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		m_SwapChainDesc.BufferCount = m_RenderDesc.swapChainBufferCount;
 		m_SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		m_SwapChainDesc.Flags = 0;//m_DeviceParams.allowModeSwitch ? DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH : 0;
 
@@ -418,11 +415,11 @@ namespace Epoch
 		}
 
 		m_FullScreenDesc = {};
-		m_FullScreenDesc.RefreshRate.Numerator = 0;//m_DeviceParams.refreshRate;
+		m_FullScreenDesc.RefreshRate.Numerator = 0;;
 		m_FullScreenDesc.RefreshRate.Denominator = 1;
 		m_FullScreenDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
 		m_FullScreenDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-		m_FullScreenDesc.Windowed = true;//!m_DeviceParams.startFullscreen;
+		m_FullScreenDesc.Windowed = true;
 
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> pSwapChain1;
 		hr = m_DxgiFactory2->CreateSwapChainForHwnd(m_GraphicsQueue.Get(), hWnd, &m_SwapChainDesc, &m_FullScreenDesc, nullptr, &pSwapChain1);
