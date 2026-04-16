@@ -1,7 +1,7 @@
 #pragma once
 #include "Epoch/Rendering/DeviceManager.h"
 
-namespace Epoch
+namespace Epoch::RHI
 {
 	class VKDeviceManager : public DeviceManager
 	{
@@ -15,6 +15,9 @@ namespace Epoch
 
 		bool BeginFrame() override;
 		bool EndFrame() override;
+
+		std::shared_ptr<RHI::Buffer> CreateBuffer(const RHI::BufferDesc& aDesc) override;
+		std::shared_ptr<RHI::Texture> CreateTexture(const RHI::TextureDesc& aDesc) override;
 
 	protected:
 		bool CreateInstance() override;

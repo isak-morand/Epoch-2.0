@@ -1,13 +1,12 @@
 #include "epch.h"
 #include "DX12DeviceManager.h"
 #include "Epoch/Core/Window.h"
-#include "Epoch/Rendering/ShaderCompiler.h"
 #include "Epoch/Rendering/Backend/NVRHI/NVRHIMessageCallback.h"
 #include <nvrhi/d3d12.h>
 #include <nvrhi/validation.h>
 #include <nvrhi/utils.h>
 
-namespace Epoch
+namespace Epoch::RHI
 {
 #define LOG_TAG LogTags::Renderer
 
@@ -55,8 +54,6 @@ namespace Epoch
 	void DX12DeviceManager::DestroyDeviceAndSwapChain()
 	{
 		DestroyRenderTargets();
-
-		m_Pipeline = nullptr;
 
 		m_RHISwapChainBuffers.clear();
 		m_NvrhiDevice = nullptr;
@@ -133,102 +130,14 @@ namespace Epoch
 		return SUCCEEDED(result);
 	}
 
-	void DX12DeviceManager::Render()
+	std::shared_ptr<RHI::Buffer> DX12DeviceManager::CreateBuffer(const RHI::BufferDesc& aDesc)
 	{
-		if (!m_CommandList)
-		{
-			m_CommandList = m_NvrhiDevice->createCommandList();
+		return std::shared_ptr<RHI::Buffer>();
+	}
 
-			ShaderCompiler shaderCompiler;
-
-			{
-				ShaderCompileInput vsIn;
-
-				vsIn.source = R"(
-				struct VSOut
-				{
-					float4 position : SV_Position;
-				};
-				
-				VSOut main(uint vertexID : SV_VertexID)
-				{
-					float2 positions[3] =
-					{
-						float2( 0.0,  0.5),
-						float2( 0.5, -0.5),
-						float2(-0.5, -0.5)
-					};
-
-					VSOut output;
-					output.position = float4(positions[vertexID], 0.0, 1.0);
-					return output;
-				}
-				)";
-
-				vsIn.entryPoint = "main";
-				vsIn.stage = ShaderStage::Vertex;
-				vsIn.optimize = true;
-				vsIn.debug = true;
-
-				ShaderCompileOutput vsOut;
-				shaderCompiler.Compile(vsIn, vsOut);
-
-				nvrhi::ShaderDesc desc;
-				desc.setShaderType(nvrhi::ShaderType::Vertex);
-
-				m_VertexShader = m_NvrhiDevice->createShader(desc, vsOut.bytecode.data(), vsOut.bytecode.size());
-			}
-
-			{
-				ShaderCompileInput psIn;
-
-				psIn.source = R"(
-				float4 main() : SV_Target
-				{
-					return float4(0.2, 0.8, 0.3, 1.0);
-				}
-				)";
-
-				psIn.entryPoint = "main";
-				psIn.stage = ShaderStage::Pixel;
-				psIn.optimize = true;
-				psIn.debug = true;
-
-				ShaderCompileOutput psOut;
-				shaderCompiler.Compile(psIn, psOut);
-
-				nvrhi::ShaderDesc desc;
-				desc.setShaderType(nvrhi::ShaderType::Pixel);
-
-				m_PixelShader = m_NvrhiDevice->createShader(desc, psOut.bytecode.data(), psOut.bytecode.size());
-			}
-
-			nvrhi::GraphicsPipelineDesc pipelineDesc;
-			pipelineDesc.VS = m_VertexShader;
-			pipelineDesc.PS = m_PixelShader;
-			pipelineDesc.renderState.depthStencilState.depthTestEnable = false;
-
-			nvrhi::FramebufferInfo fbInfo;
-			fbInfo.addColorFormat(nvrhi::Format::RGBA8_UNORM);
-
-			m_Pipeline = m_NvrhiDevice->createGraphicsPipeline(pipelineDesc, fbInfo);
-		}
-
-		m_CommandList->open();
-		m_CommandList->clearTextureFloat(m_RHISwapChainBuffers[GetCurrentBackBufferIndex()], nvrhi::AllSubresources, nvrhi::Color(0, 0, 0, 0));
-
-		nvrhi::GraphicsState state;
-		state.pipeline = m_Pipeline;
-		state.framebuffer = m_SwapChainFramebuffers[GetCurrentBackBufferIndex()];
-		state.viewport.addViewportAndScissorRect(m_SwapChainFramebuffers[GetCurrentBackBufferIndex()]->getFramebufferInfo().getViewport());
-
-		m_CommandList->setGraphicsState(state);
-
-		m_CommandList->draw({ 3 });
-
-		m_CommandList->close();
-
-		m_NvrhiDevice->executeCommandList(m_CommandList);
+	std::shared_ptr<RHI::Texture> DX12DeviceManager::CreateTexture(const RHI::TextureDesc& aDesc)
+	{
+		return std::shared_ptr<RHI::Texture>();
 	}
 
 	bool DX12DeviceManager::CreateInstance()
@@ -250,7 +159,7 @@ namespace Epoch
 	{
 		if (m_RenderDesc.enableDebugRuntime)
 		{
-			Microsoft::WRL::ComPtr<ID3D12Debug> pDebug;
+			ComPtr<ID3D12Debug> pDebug;
 			HRESULT hr = D3D12GetDebugInterface(IID_PPV_ARGS(pDebug.GetAddressOf()));
 
 			if (SUCCEEDED(hr))
@@ -266,7 +175,7 @@ namespace Epoch
 
 		if (m_RenderDesc.enableGPUValidation)
 		{
-			Microsoft::WRL::ComPtr<ID3D12Debug3> debugController3;
+			ComPtr<ID3D12Debug3> debugController3;
 			HRESULT hr = D3D12GetDebugInterface(IID_PPV_ARGS(debugController3.GetAddressOf()));
 		
 			if (SUCCEEDED(hr))
@@ -360,7 +269,7 @@ namespace Epoch
 
 		if (m_RenderDesc.enableDebugRuntime)
 		{
-			Microsoft::WRL::ComPtr<ID3D12InfoQueue> pInfoQueue;
+			ComPtr<ID3D12InfoQueue> pInfoQueue;
 			m_Device12->QueryInterface(pInfoQueue.GetAddressOf());
 
 			if (pInfoQueue)
@@ -485,7 +394,7 @@ namespace Epoch
 		//	break;
 		//}
 
-		Microsoft::WRL::ComPtr<IDXGIFactory5> pDxgiFactory5;
+		ComPtr<IDXGIFactory5> pDxgiFactory5;
 		if (SUCCEEDED(m_DxgiFactory2->QueryInterface(IID_PPV_ARGS(pDxgiFactory5.GetAddressOf()))))
 		{
 			BOOL supported = 0;
@@ -507,7 +416,7 @@ namespace Epoch
 		m_FullScreenDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 		m_FullScreenDesc.Windowed = true;
 
-		Microsoft::WRL::ComPtr<IDXGISwapChain1> pSwapChain1;
+		ComPtr<IDXGISwapChain1> pSwapChain1;
 		hr = m_DxgiFactory2->CreateSwapChainForHwnd(m_GraphicsQueue.Get(), hWnd, &m_SwapChainDesc, &m_FullScreenDesc, nullptr, &pSwapChain1);
 		if (FAILED(hr))
 		{
@@ -587,7 +496,7 @@ namespace Epoch
 			textureDesc.initialState = nvrhi::ResourceStates::Present;
 			textureDesc.keepInitialState = true;
 
-			m_RHISwapChainBuffers[n] = m_NvrhiDevice->createHandleForNativeTexture(nvrhi::ObjectTypes::D3D12_Resource, nvrhi::Object(m_SwapChainBuffers[n]), textureDesc);
+			m_RHISwapChainBuffers[n] = m_NvrhiDevice->createHandleForNativeTexture(nvrhi::ObjectTypes::D3D12_Resource, nvrhi::Object(m_SwapChainBuffers[n].Get()), textureDesc);
 		}
 
 		CreateFramebuffers();

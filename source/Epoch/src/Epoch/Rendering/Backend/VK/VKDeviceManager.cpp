@@ -1,7 +1,7 @@
 #include "epch.h"
 #include "VKDeviceManager.h"
 
-namespace Epoch
+namespace Epoch::RHI
 {
 	VKDeviceManager::VKDeviceManager() = default;
 	VKDeviceManager::~VKDeviceManager() = default;
@@ -22,6 +22,16 @@ namespace Epoch
 	bool VKDeviceManager::EndFrame()
 	{
 		return false;
+	}
+
+	std::shared_ptr<RHI::Buffer> VKDeviceManager::CreateBuffer(const RHI::BufferDesc& aDesc)
+	{
+		return std::shared_ptr<RHI::Buffer>();
+	}
+
+	std::shared_ptr<RHI::Texture> VKDeviceManager::CreateTexture(const RHI::TextureDesc& aDesc)
+	{
+		return std::shared_ptr<RHI::Texture>();
 	}
 
 	bool VKDeviceManager::CreateInstance()

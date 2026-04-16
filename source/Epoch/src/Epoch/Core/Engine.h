@@ -19,6 +19,12 @@ namespace Epoch
 		RendererDesc renderer;
 	};
 
+	struct EngineStats
+	{
+		float gameFrameTimeAvg = 0.0f;
+		float renderFrameTimeAvg = 0.0f;
+	};
+
 	class Engine
 	{
 	public:
@@ -33,7 +39,7 @@ namespace Epoch
 		Window* GetWindow() { return m_Window.get(); }
 		Renderer* GetRenderer() { return m_Renderer.get(); }
 
-		GraphicsAPI GetGraphicsAPI() const;
+		RHI::API GetGraphicsAPI() const;
 
 		void Run();
 		void Stop() { m_IsRunning = false; }
@@ -42,10 +48,15 @@ namespace Epoch
 		float GetTotalTime() const { return m_Timer.Elapsed(); }
 		uint32_t GetFrameCount() const { return m_FrameCount; }
 
+		const EngineStats& GetEngineStats() const { return m_EngineStats; }
+
 	private:
 		void OnEvent(Event& aEvent);
 		bool OnWindowClose(WindowCloseEvent& aEvent);
 		bool OnWindowResize(WindowResizeEvent& aEvent);
+
+		void UpdateTime();
+		void UpdateEngineStats();
 
 	private:
 		static inline Engine* s_Instance = nullptr;
@@ -59,7 +70,14 @@ namespace Epoch
 		float m_LastTime = 0.0f;
 		uint32_t m_FrameCount = 0u;
 
+		float m_AverageFrameTime = 0.0f;
+		float m_AverageTimeUpdateInterval = 0.5f;
+		float m_FrameTimeSum = 0.0f;
+		uint32_t m_NumberOfAccumulatedFrames = 0u;
+
 		std::unique_ptr<Window> m_Window;
 		std::unique_ptr<Renderer> m_Renderer;
+
+		EngineStats m_EngineStats;
 	};
 }

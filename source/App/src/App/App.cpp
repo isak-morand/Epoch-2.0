@@ -2,10 +2,6 @@
 #include <Epoch/Debug/Log.h>
 #include <Epoch/Events/WindowEvents.h>
 #include <Epoch/Core/Engine.h>
-#include <Epoch/Rendering/Renderer.h>
-#include <Epoch/Rendering/DeviceManager.h>
-
-#include <chrono>
 
 App::App() {}
 App::~App() {}
@@ -15,29 +11,19 @@ void App::OnShutdown() {}
 
 void App::OnUpdate(float aDeltaTime)
 {
-	static uint32_t frames = 0;
-	static float totalTime = 0.5f;
-	static std::chrono::time_point<std::chrono::high_resolution_clock> lastTime = std::chrono::high_resolution_clock::now();
+	static float totalTime = 0.0f;
+	totalTime += aDeltaTime;
 
-	std::chrono::time_point<std::chrono::high_resolution_clock> time = std::chrono::high_resolution_clock::now();
-	float delta = std::chrono::duration_cast<std::chrono::microseconds>(time - lastTime).count() * 0.001f * 0.001f;
-	lastTime = time;
-
-	frames++;
-	totalTime += delta;
-
-	if (totalTime >= 0.5)
+	if (totalTime >= 1.f)
 	{
-		uint32_t cpuFPS = (uint32_t)(frames / totalTime);
-
-		float gpuFrameTime = Epoch::Engine::Get()->GetRenderer()->GetAverageFrameTime();
-		uint32_t gpuFPS = (uint32_t)(1.0f / gpuFrameTime);
-
-		std::string title = std::format("Epoch <{}> {} cpu, {} gpu", Epoch::GraphicsAPIToString(Epoch::Engine::Get()->GetGraphicsAPI()), cpuFPS, gpuFPS);
+		const Epoch::EngineStats& stats = Epoch::Engine::Get()->GetEngineStats();
+		std::string title = std::format("Epoch <{}> {} updates, {} fps",
+			Epoch::RHI::APIToString(Epoch::Engine::Get()->GetGraphicsAPI()),
+			(uint32_t)(1.f / stats.gameFrameTimeAvg),
+			(uint32_t)(1.f / stats.renderFrameTimeAvg));
 		UpdateWindowTitle(title);
 
-		totalTime -= 0.5f;
-		frames = 0;
+		totalTime = 0.0f;
 	}
 }
 

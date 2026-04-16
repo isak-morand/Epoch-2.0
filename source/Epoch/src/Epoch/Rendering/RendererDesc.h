@@ -1,38 +1,12 @@
 #pragma once
-#include "Format.h"
+#include <string_view>
+#include "Types.h"
 
 namespace Epoch
 {
-	enum class GraphicsAPI
-	{
-		None,
-		Vulkan,
-		D3D12,
-		//Metal,
-		//GNM,
-		//NVN
-	};
-
-	inline std::string_view GraphicsAPIToString(GraphicsAPI aAPI)
-	{
-		switch (aAPI)
-		{
-		case GraphicsAPI::Vulkan:	return "vulkan";
-		case GraphicsAPI::D3D12:	return "d3d12";
-		default:					return "UNKNOWN";
-		}
-	}
-
-	inline GraphicsAPI GraphicsAPIFromString(std::string_view aAPI)
-	{
-		if (aAPI == "vulkan") return GraphicsAPI::Vulkan;
-		if (aAPI == "d3d12") return GraphicsAPI::D3D12;
-		return GraphicsAPI::None;
-	}
-
 	struct RendererDesc
 	{
-		GraphicsAPI graphicsAPI = GraphicsAPI::None;
+		RHI::API graphicsAPI = RHI::API::None;
 
 		bool enableDebugRuntime = false;
 		bool enableGPUValidation = false;

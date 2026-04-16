@@ -4,7 +4,11 @@
 namespace Epoch
 {
 	class Window;
-	class DeviceManager;
+
+	namespace RHI
+	{
+		class DeviceManager;
+	}
 
 	class Renderer
 	{
@@ -16,9 +20,9 @@ namespace Epoch
 
 		void Render();
 
-		const DeviceManager* GetDeviceManager() const { return m_DeviceManager.get(); }
+		const RHI::DeviceManager* GetDeviceManager() const { return m_DeviceManager.get(); }
 
-		GraphicsAPI GetAPI() const;
+		RHI::API GetAPI() const;
 
 		float GetAverageFrameTime() const { return m_AverageFrameTime; }
 
@@ -26,11 +30,11 @@ namespace Epoch
 		void UpdateAverageFrameTime();
 
 	private:
-		std::unique_ptr<DeviceManager> m_DeviceManager;
+		std::unique_ptr<RHI::DeviceManager> m_DeviceManager;
 
-		float m_AverageFrameTime = 0.0;
-		float m_AverageTimeUpdateInterval = 0.5;
-		float m_FrameTimeSum = 0.0;
-		uint32_t m_NumberOfAccumulatedFrames = 0;
+		float m_AverageFrameTime = 0.0f;
+		float m_AverageTimeUpdateInterval = 0.5f;
+		float m_FrameTimeSum = 0.0f;
+		uint32_t m_NumberOfAccumulatedFrames = 0u;
 	};
 }

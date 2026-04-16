@@ -1,7 +1,7 @@
 #pragma once
 #include <nvrhi/nvrhi.h>
 
-namespace Epoch
+namespace Epoch::RHI
 {
 	struct NVRHIMessageCallback : public nvrhi::IMessageCallback
 	{

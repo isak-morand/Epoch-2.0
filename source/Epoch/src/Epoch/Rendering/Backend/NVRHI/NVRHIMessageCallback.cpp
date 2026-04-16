@@ -1,7 +1,7 @@
 #include "epch.h"
 #include "NVRHIMessageCallback.h"
 
-namespace Epoch
+namespace Epoch::RHI
 {
 #define LOG_TAG LogTags::Renderer
 

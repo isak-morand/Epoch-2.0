@@ -12,7 +12,7 @@ namespace Epoch
 {
 	Engine::Engine(const EngineDesc& aDesc)
 	{
-		EPOCH_ASSERT(s_Instance == nullptr, "Engine already exists!");
+		EPOCH_ASSERT(!s_Instance, "Engine already exists!");
 		s_Instance = this;
 
 		m_Window = Window::Create(aDesc.window);
@@ -31,7 +31,7 @@ namespace Epoch
 		m_Application = aApp;
 	}
 
-	GraphicsAPI Engine::GetGraphicsAPI() const
+	RHI::API Engine::GetGraphicsAPI() const
 	{
 		return m_Renderer->GetAPI();
 	}
@@ -67,10 +67,8 @@ namespace Epoch
 				m_Application->OnUpdate(m_DeltaTime);
 			}
 
-			float time = m_Timer.Elapsed();
-			m_DeltaTime = time - m_LastTime;
-			m_LastTime = time;
-			++m_FrameCount;
+			UpdateTime();
+			UpdateEngineStats();
 
 			EPOCH_PROFILE_MARK_FRAME;
 		}
@@ -116,5 +114,29 @@ namespace Epoch
 	{
 		m_Renderer->OnWindowResize(aEvent.GetWidth(), aEvent.GetHeight());
 		return true;
+	}
+
+	void Engine::UpdateTime()
+	{
+		float time = m_Timer.Elapsed();
+		m_DeltaTime = time - m_LastTime;
+		m_LastTime = time;
+		++m_FrameCount;
+
+		m_FrameTimeSum += m_DeltaTime;
+		++m_NumberOfAccumulatedFrames;
+
+		if (m_FrameTimeSum > m_AverageTimeUpdateInterval && m_NumberOfAccumulatedFrames > 0)
+		{
+			m_AverageFrameTime = m_FrameTimeSum / m_NumberOfAccumulatedFrames;
+			m_NumberOfAccumulatedFrames = 0;
+			m_FrameTimeSum = 0.0;
+		}
+	}
+
+	void Engine::UpdateEngineStats()
+	{
+		m_EngineStats.gameFrameTimeAvg = m_AverageFrameTime;
+		m_EngineStats.renderFrameTimeAvg = m_Renderer->GetAverageFrameTime();
 	}
 }

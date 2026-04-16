@@ -107,7 +107,7 @@ namespace Epoch
 			return false;
 		}
 
-		LOG_INFO(LOG_TAG, "Shader compilation succeeded ({} bytes)", shaderBlob->GetBufferSize());
+		LOG_TRACE(LOG_TAG, "Shader compilation succeeded ({} bytes)", shaderBlob->GetBufferSize());
 
 		outOutput.bytecode.resize(shaderBlob->GetBufferSize());
 		memcpy(outOutput.bytecode.data(), shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize());

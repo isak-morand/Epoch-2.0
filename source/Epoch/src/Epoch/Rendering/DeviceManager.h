@@ -1,17 +1,24 @@
 #pragma once
 #include <memory>
 #include "RendererDesc.h"
+#include "Resources/Buffer.h"
+#include "Resources/Texture.h"
+
+#include <nvrhi/nvrhi.h>
 
 namespace Epoch
 {
 	class Window;
+}
 
+namespace Epoch::RHI
+{
 	class DeviceManager
 	{
 	public:
 		virtual ~DeviceManager();
 
-		static std::unique_ptr<DeviceManager> Create(GraphicsAPI aGraphicsAPI);
+		static std::unique_ptr<DeviceManager> Create(RHI::API aGraphicsAPI);
 
 		bool CreateDeviceAndSwapChain(const RendererDesc& aRenderDesc, Window* aWindow);
 		virtual void DestroyDeviceAndSwapChain() = 0;
@@ -21,9 +28,14 @@ namespace Epoch
 		virtual bool BeginFrame() = 0;
 		virtual bool EndFrame() = 0;
 
-		virtual void Render() {}
+		virtual nvrhi::DeviceHandle GetDevice() { return nullptr; }
+		virtual nvrhi::FramebufferHandle GetCurrentFramebuffer() { return nullptr; }
+		virtual nvrhi::TextureHandle GetCurrentFramebufferImage() { return nullptr; }
 
-		GraphicsAPI GetAPI() const { return m_RenderDesc.graphicsAPI; }
+		virtual std::shared_ptr<RHI::Buffer> CreateBuffer(const RHI::BufferDesc& aDesc) = 0;
+		virtual std::shared_ptr<RHI::Texture> CreateTexture(const RHI::TextureDesc& aDesc) = 0;
+
+		RHI::API GetAPI() const { return m_RenderDesc.graphicsAPI; }
 
 	protected:
 		DeviceManager();

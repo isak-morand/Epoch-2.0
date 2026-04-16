@@ -6,7 +6,7 @@ void Main(Epoch::Args aArgs)
 {
 	Epoch::EngineDesc desc;
 	desc.window.startMaximized = true;
-	desc.renderer.graphicsAPI = Epoch::GraphicsAPI::D3D12;
+	desc.renderer.graphicsAPI = Epoch::RHI::API::D3D12;
 
 #ifdef _DEBUG
 	desc.renderer.enableDebugRuntime = true;
