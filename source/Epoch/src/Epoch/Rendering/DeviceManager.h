@@ -24,15 +24,6 @@ namespace Epoch
 		virtual void Render() {}
 
 		GraphicsAPI GetAPI() const { return m_RenderDesc.graphicsAPI; }
-		std::string_view GetAPIName() const
-		{
-			switch (m_RenderDesc.graphicsAPI)
-			{
-			case Epoch::GraphicsAPI::Vulkan:	return "vulkan";
-			case Epoch::GraphicsAPI::D3D12:		return "d3d12";
-			default:							return "UNKNOWN";
-			}
-		}
 
 	protected:
 		DeviceManager();
@@ -46,5 +37,7 @@ namespace Epoch
 
 	protected:
 		RendererDesc m_RenderDesc;
+
+		std::string m_AdaptorName;
 	};
 }

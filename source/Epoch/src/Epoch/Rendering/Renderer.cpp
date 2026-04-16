@@ -30,6 +30,11 @@ namespace Epoch
 		UpdateAverageFrameTime();
 	}
 
+	GraphicsAPI Renderer::GetAPI() const
+	{
+		return m_DeviceManager->GetAPI();
+	}
+
 	void Renderer::UpdateAverageFrameTime()
 	{
 		static std::chrono::time_point<std::chrono::high_resolution_clock> lastTime = std::chrono::high_resolution_clock::now();

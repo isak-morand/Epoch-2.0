@@ -13,13 +13,30 @@ namespace Epoch
 		//NVN
 	};
 
+	inline std::string_view GraphicsAPIToString(GraphicsAPI aAPI)
+	{
+		switch (aAPI)
+		{
+		case GraphicsAPI::Vulkan:	return "vulkan";
+		case GraphicsAPI::D3D12:	return "d3d12";
+		default:					return "UNKNOWN";
+		}
+	}
+
+	inline GraphicsAPI GraphicsAPIFromString(std::string_view aAPI)
+	{
+		if (aAPI == "vulkan") return GraphicsAPI::Vulkan;
+		if (aAPI == "d3d12") return GraphicsAPI::D3D12;
+		return GraphicsAPI::None;
+	}
+
 	struct RendererDesc
 	{
 		GraphicsAPI graphicsAPI = GraphicsAPI::None;
 
 		bool enableDebugRuntime = false;
+		bool enableGPUValidation = false;
 		bool enableWarningsAsErrors = false;
-		bool enableGPUValidation = false; // Affects only DX12
 
 		//TextureFormat swapChainFormat = TextureFormat::RGBA8_UNORM;
 		uint32_t swapChainBufferCount = 3;

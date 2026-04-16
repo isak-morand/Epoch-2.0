@@ -33,6 +33,8 @@ namespace Epoch
 		uint32_t GetBackBufferCount() override;
 
 	private:
+		std::string GetAdapterName(DXGI_ADAPTER_DESC const& aDesc);
+
 		bool CreateRenderTargets();
 		void DestroyRenderTargets();
 		void ResizeSwapChain();
@@ -53,25 +55,20 @@ namespace Epoch
 		HWND											m_HWND = nullptr;
 		bool											m_TearingSupported = false;
 
-		struct SwapChainBuffer
-		{
-			Microsoft::WRL::ComPtr<ID3D12Resource> nativeBuffer;
-			nvrhi::TextureHandle buffer;
-		};
-		std::vector<SwapChainBuffer>					m_SwapChainBuffers;
+		std::vector<nvrhi::RefCountPtr<ID3D12Resource>> m_SwapChainBuffers;
+		std::vector<nvrhi::TextureHandle>				m_RHISwapChainBuffers;
 		Microsoft::WRL::ComPtr<ID3D12Fence>				m_FrameFence;
 		std::vector<HANDLE>								m_FrameFenceEvents;
 
 		std::vector<nvrhi::FramebufferHandle>			m_SwapChainFramebuffers;
 
-		UINT64											m_FrameCount = 1;
-
 		bool											m_ShouldResize = false;
+
+		UINT64											m_FrameCount = 1;
 
 		nvrhi::DeviceHandle								m_NvrhiDevice;
 
 		nvrhi::CommandListHandle						m_CommandList;
-
 		nvrhi::ShaderHandle								m_VertexShader;
 		nvrhi::ShaderHandle								m_PixelShader;
 		nvrhi::GraphicsPipelineHandle					m_Pipeline;

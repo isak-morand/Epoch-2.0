@@ -12,6 +12,7 @@ namespace Epoch
 {
 	Engine::Engine(const EngineDesc& aDesc)
 	{
+		EPOCH_ASSERT(s_Instance == nullptr, "Engine already exists!");
 		s_Instance = this;
 
 		m_Window = Window::Create(aDesc.window);
@@ -22,11 +23,17 @@ namespace Epoch
 
 	Engine::~Engine()
 	{
+		s_Instance = nullptr;
 	}
 
 	void Engine::SetApp(Application* aApp)
 	{
 		m_Application = aApp;
+	}
+
+	GraphicsAPI Engine::GetGraphicsAPI() const
+	{
+		return m_Renderer->GetAPI();
 	}
 
 	void Engine::Run()
@@ -47,6 +54,7 @@ namespace Epoch
 				}
 			});
 
+		m_Timer.Reset();
 		m_IsRunning = true;
 		while (m_IsRunning)
 		{
@@ -56,8 +64,13 @@ namespace Epoch
 
 			if (m_Application)
 			{
-				m_Application->OnUpdate(1);
+				m_Application->OnUpdate(m_DeltaTime);
 			}
+
+			float time = m_Timer.Elapsed();
+			m_DeltaTime = time - m_LastTime;
+			m_LastTime = time;
+			++m_FrameCount;
 
 			EPOCH_PROFILE_MARK_FRAME;
 		}

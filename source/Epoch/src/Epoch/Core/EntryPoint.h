@@ -1,7 +1,8 @@
-#include <Epoch/Core/Paths.h>
-#include <Epoch/Debug/Log.h>
+#include "Args.h"
+#include "Paths.h"
+#include "Epoch/Debug/Log.h"
 
-extern void Main(int aArgc, char** aArgv);
+extern void Main(Epoch::Args aArgs);
 
 #ifdef EPOCH_PLATFORM_WINDOWS
 static void AddDllSearchPath()
@@ -30,24 +31,12 @@ int main()
 	AddDllSearchPath();
 #endif
 
+	Epoch::Args args(__argc, __argv);
+
 	Epoch::Paths::Init();
 	Epoch::Log::Init();
 
-	/*if (__argc > 1)
-	{
-		std::vector<std::string> args(__argc - 1);
-		for (size_t i = 1; i < __argc; i++)
-		{
-			args[i - 1] = std::string(__argv[i]);
-		}
-
-		for (auto& arg : args)
-		{
-			LOG_DEBUG(LogTags::Core, "{}", arg);
-		}
-	}*/
-
-	Main(__argc, __argv);
+	Main(args);
 
 	Epoch::Log::ShutDown();
 }

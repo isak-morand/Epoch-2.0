@@ -73,11 +73,6 @@ namespace Epoch::GLFW
 		glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-		if (aDesc.startBorderless)
-		{
-			glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-		}
-
 		m_Window = glfwCreateWindow
 		(
 			(int)m_Width,
@@ -97,10 +92,10 @@ namespace Epoch::GLFW
 			int x, y;
 			glfwGetMonitorPos(monitor, &x, &y);
 
+			glfwSetWindowAttrib(m_Window, GLFW_DECORATED, GLFW_FALSE);
 			glfwSetWindowMonitor(m_Window, nullptr, x, y, mode->width, mode->height, mode->refreshRate);
 		}
-
-		if (aDesc.startMaximized)
+		else if (aDesc.startMaximized)
 		{
 			glfwMaximizeWindow(m_Window);
 		}

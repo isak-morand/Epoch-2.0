@@ -14,8 +14,7 @@ namespace Epoch
 		uint32_t height = 720;
 
 		bool startMaximized = false;
-		bool startFullscreen = false;
-		bool startBorderless = false;
+		bool startFullscreen = false; //Borderless, exclusive fullscreen not supported
 	};
 
 	class Window

@@ -33,7 +33,7 @@ void App::OnUpdate(float aDeltaTime)
 		float gpuFrameTime = Epoch::Engine::Get()->GetRenderer()->GetAverageFrameTime();
 		uint32_t gpuFPS = (uint32_t)(1.0f / gpuFrameTime);
 
-		std::string title = std::format("Epoch <{}> {} cpu, {} gpu", Epoch::Engine::Get()->GetRenderer()->GetDeviceManager()->GetAPIName(), cpuFPS, gpuFPS);
+		std::string title = std::format("Epoch <{}> {} cpu, {} gpu", Epoch::GraphicsAPIToString(Epoch::Engine::Get()->GetGraphicsAPI()), cpuFPS, gpuFPS);
 		UpdateWindowTitle(title);
 
 		totalTime -= 0.5f;

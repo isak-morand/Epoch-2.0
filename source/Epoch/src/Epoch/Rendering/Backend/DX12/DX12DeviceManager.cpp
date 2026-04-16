@@ -2,6 +2,7 @@
 #include "DX12DeviceManager.h"
 #include "Epoch/Core/Window.h"
 #include "Epoch/Rendering/ShaderCompiler.h"
+#include "Epoch/Rendering/Backend/NVRHI/NVRHIMessageCallback.h"
 #include <nvrhi/d3d12.h>
 #include <nvrhi/validation.h>
 #include <nvrhi/utils.h>
@@ -9,6 +10,44 @@
 namespace Epoch
 {
 #define LOG_TAG LogTags::Renderer
+
+	namespace
+	{
+		std::string_view FeatureLevelToString(D3D_FEATURE_LEVEL aLevel)
+		{
+			switch (aLevel)
+			{
+			case D3D_FEATURE_LEVEL_12_2: return "12.2";
+			case D3D_FEATURE_LEVEL_12_1: return "12.1";
+			case D3D_FEATURE_LEVEL_12_0: return "12.0";
+			default: return "Unknown";
+			}
+		}
+
+		std::string HrToString(HRESULT hr)
+		{
+			char* messageBuffer = nullptr;
+
+			DWORD size = FormatMessageA(
+				FORMAT_MESSAGE_ALLOCATE_BUFFER |
+				FORMAT_MESSAGE_FROM_SYSTEM |
+				FORMAT_MESSAGE_IGNORE_INSERTS,
+				nullptr,
+				hr,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				(LPSTR)&messageBuffer,
+				0,
+				nullptr);
+
+			std::string message = (size && messageBuffer)
+				? std::string(messageBuffer, size)
+				: "Unknown error";
+
+			LocalFree(messageBuffer);
+
+			return message;
+		}
+	}
 
 	DX12DeviceManager::DX12DeviceManager() = default;
 	DX12DeviceManager::~DX12DeviceManager() = default;
@@ -19,6 +58,7 @@ namespace Epoch
 
 		m_Pipeline = nullptr;
 
+		m_RHISwapChainBuffers.clear();
 		m_NvrhiDevice = nullptr;
 
 		for (auto fenceEvent : m_FrameFenceEvents)
@@ -175,7 +215,7 @@ namespace Epoch
 		}
 
 		m_CommandList->open();
-		m_CommandList->clearTextureFloat(m_SwapChainBuffers[GetCurrentBackBufferIndex()].buffer, nvrhi::AllSubresources, nvrhi::Color(0, 0, 0, 0));
+		m_CommandList->clearTextureFloat(m_RHISwapChainBuffers[GetCurrentBackBufferIndex()], nvrhi::AllSubresources, nvrhi::Color(0, 0, 0, 0));
 
 		nvrhi::GraphicsState state;
 		state.pipeline = m_Pipeline;
@@ -256,20 +296,66 @@ namespace Epoch
 			return false;
 		}
 
+		{
+			DXGI_ADAPTER_DESC aDesc;
+			m_DxgiAdapter->GetDesc(&aDesc);
+		
+			m_AdaptorName = GetAdapterName(aDesc);
+			//m_IsNvidia = IsNvDeviceID(aDesc.VendorId);
+		}
+
+		HRESULT hr = E_FAIL;
+
+		//D3D_FEATURE_LEVEL featureLevels[] =
 		//{
-		//	DXGI_ADAPTER_DESC aDesc;
-		//	m_DxgiAdapter->GetDesc(&aDesc);
+		//	D3D_FEATURE_LEVEL_12_2,
+		//	D3D_FEATURE_LEVEL_12_1,
+		//	D3D_FEATURE_LEVEL_12_0,
+		//};
+		//D3D_FEATURE_LEVEL chosenFeatureLevel = D3D_FEATURE_LEVEL_12_0;
 		//
-		//	m_RendererString = GetAdapterName(aDesc);
-		//	m_IsNvidia = IsNvDeviceID(aDesc.VendorId);
+		//for (auto level : featureLevels)
+		//{
+		//	hr = D3D12CreateDevice(m_DxgiAdapter.Get(), level, IID_PPV_ARGS(m_Device12.GetAddressOf()));
+		//
+		//	if (SUCCEEDED(hr))
+		//	{
+		//		chosenFeatureLevel = level;
+		//		LOG_TRACE(LOG_TAG, "D3D12 device created with feature level: {}", FeatureLevelToString(chosenFeatureLevel));
+		//		break;
+		//	}
+		//}
+		//
+		//if (FAILED(hr))
+		//{
+		//	LOG_ERROR(LOG_TAG, "D3D12CreateDevice failed! Error: {}", HrToString(hr));
+		//	return false;
 		//}
 
-		HRESULT hr = D3D12CreateDevice(m_DxgiAdapter.Get(), D3D_FEATURE_LEVEL_11_1, IID_PPV_ARGS(m_Device12.GetAddressOf()));
-		
+		hr = D3D12CreateDevice(m_DxgiAdapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(m_Device12.GetAddressOf()));
 		if (FAILED(hr))
 		{
-			LOG_ERROR(LOG_TAG, "D3D12CreateDevice failed! Error code: {}", hr);
+			LOG_ERROR(LOG_TAG, "D3D12CreateDevice failed! Error: {}", HrToString(hr));
 			return false;
+		}
+
+		D3D_FEATURE_LEVEL levels[] =
+		{
+			D3D_FEATURE_LEVEL_12_2,
+			D3D_FEATURE_LEVEL_12_1,
+			D3D_FEATURE_LEVEL_12_0,
+		};
+
+		D3D12_FEATURE_DATA_FEATURE_LEVELS featureLevels = {};
+		featureLevels.NumFeatureLevels = _countof(levels);
+		featureLevels.pFeatureLevelsRequested = levels;
+
+		hr = m_Device12->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &featureLevels, sizeof(featureLevels));
+
+		if (SUCCEEDED(hr))
+		{
+			D3D_FEATURE_LEVEL maxLevel = featureLevels.MaxSupportedFeatureLevel;
+			LOG_TRACE(LOG_TAG, "Max supported feature level: {}", FeatureLevelToString(maxLevel));
 		}
 
 		if (m_RenderDesc.enableDebugRuntime)
@@ -311,7 +397,7 @@ namespace Epoch
 		hr = m_Device12->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(m_GraphicsQueue.GetAddressOf()));
 		if (FAILED(hr))
 		{
-			LOG_ERROR(LOG_TAG, "CreateCommandQueue failed! Error code: {}", hr);
+			LOG_ERROR(LOG_TAG, "CreateCommandQueue failed! Error: {}", HrToString(hr));
 			return false;
 		}
 		m_GraphicsQueue->SetName(L"Graphics Queue");
@@ -324,7 +410,7 @@ namespace Epoch
 		//	hr = m_Device12->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(m_ComputeQueue.GetAddressOf()));
 		//	if (FAILED(hr))
 		//	{
-		//		LOG_ERROR(LOG_TAG, "CreateCommandQueue failed! Error code: {}", hr);
+		//		LOG_ERROR(LOG_TAG, "CreateCommandQueue failed! Error: {}", HrToString(hr));
 		//		return false;
 		//	}
 		//	m_ComputeQueue->SetName(L"Compute Queue");
@@ -337,7 +423,7 @@ namespace Epoch
 		//	hr = m_Device12->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(m_CopyQueue.GetAddressOf()));
 		//	if (FAILED(hr))
 		//	{
-		//		LOG_ERROR(LOG_TAG, "CreateCommandQueue failed! Error code: {}", hr);
+		//		LOG_ERROR(LOG_TAG, "CreateCommandQueue failed! Error: {}", HrToString(hr));
 		//		return false;
 		//	}
 		//	m_CopyQueue->SetName(L"Copy Queue");
@@ -345,7 +431,7 @@ namespace Epoch
 		//}
 
 		nvrhi::d3d12::DeviceDesc deviceDesc;
-		//deviceDesc.errorCB = m_DeviceParams.messageCallback ? m_DeviceParams.messageCallback : &DefaultMessageCallback::GetInstance();
+		deviceDesc.errorCB = &NVRHIMessageCallback::GetInstance();
 		deviceDesc.pDevice = m_Device12.Get();
 		deviceDesc.pGraphicsCommandQueue = m_GraphicsQueue.Get();
 		deviceDesc.pComputeCommandQueue = m_ComputeQueue.Get();
@@ -355,11 +441,11 @@ namespace Epoch
 
 		m_NvrhiDevice = nvrhi::d3d12::createDevice(deviceDesc);
 
-		//if (m_DeviceParams.enableNvrhiValidationLayer)
-		//{
-		//	m_NvrhiDevice = nvrhi::validation::createValidationLayer(m_NvrhiDevice);
-		//	LOG_TRACE(LOG_TAG, "NVRHI validation layer enabled");
-		//}
+		if (m_RenderDesc.enableGPUValidation)
+		{
+			m_NvrhiDevice = nvrhi::validation::createValidationLayer(m_NvrhiDevice);
+			LOG_TRACE(LOG_TAG, "NVRHI validation layer enabled");
+		}
 
 		return true;
 	}
@@ -425,7 +511,7 @@ namespace Epoch
 		hr = m_DxgiFactory2->CreateSwapChainForHwnd(m_GraphicsQueue.Get(), hWnd, &m_SwapChainDesc, &m_FullScreenDesc, nullptr, &pSwapChain1);
 		if (FAILED(hr))
 		{
-			LOG_ERROR(LOG_TAG, "CreateSwapChainForHwnd failed! Error code: {}", hr);
+			LOG_ERROR(LOG_TAG, "CreateSwapChainForHwnd failed! Error: {}", HrToString(hr));
 			return false;
 		}
 
@@ -465,13 +551,25 @@ namespace Epoch
 		return m_SwapChainDesc.BufferCount;
 	}
 
+	std::string DX12DeviceManager::GetAdapterName(DXGI_ADAPTER_DESC const& aDesc)
+	{
+		size_t length = wcsnlen(aDesc.Description, _countof(aDesc.Description));
+
+		std::string name;
+		name.resize(length);
+		WideCharToMultiByte(CP_ACP, 0, aDesc.Description, int(length), name.data(), int(name.size()), nullptr, nullptr);
+
+		return name;
+	}
+
 	bool DX12DeviceManager::CreateRenderTargets()
 	{
 		m_SwapChainBuffers.resize(m_SwapChainDesc.BufferCount);
+		m_RHISwapChainBuffers.resize(m_SwapChainDesc.BufferCount);
 
 		for (UINT n = 0; n < m_SwapChainDesc.BufferCount; n++)
 		{
-			const HRESULT hr = m_SwapChain->GetBuffer(n, IID_PPV_ARGS(m_SwapChainBuffers[n].nativeBuffer.GetAddressOf()));
+			const HRESULT hr = m_SwapChain->GetBuffer(n, IID_PPV_ARGS(m_SwapChainBuffers[n].GetAddressOf()));
 			if (FAILED(hr))
 			{
 				return false;
@@ -489,7 +587,7 @@ namespace Epoch
 			textureDesc.initialState = nvrhi::ResourceStates::Present;
 			textureDesc.keepInitialState = true;
 
-			m_SwapChainBuffers[n].buffer = m_NvrhiDevice->createHandleForNativeTexture(nvrhi::ObjectTypes::D3D12_Resource, nvrhi::Object(m_SwapChainBuffers[n].nativeBuffer.Get()), textureDesc);
+			m_RHISwapChainBuffers[n] = m_NvrhiDevice->createHandleForNativeTexture(nvrhi::ObjectTypes::D3D12_Resource, nvrhi::Object(m_SwapChainBuffers[n]), textureDesc);
 		}
 
 		CreateFramebuffers();
@@ -513,6 +611,7 @@ namespace Epoch
 		}
 
 		m_SwapChainBuffers.clear();
+		m_RHISwapChainBuffers.clear();
 	}
 
 	void DX12DeviceManager::ResizeSwapChain()
@@ -546,7 +645,7 @@ namespace Epoch
 		m_SwapChainFramebuffers.resize(m_SwapChainDesc.BufferCount);
 		for (size_t i = 0; i < m_SwapChainDesc.BufferCount; i++)
 		{
-			nvrhi::FramebufferDesc framebufferDesc = nvrhi::FramebufferDesc().addColorAttachment(m_SwapChainBuffers[i].buffer);
+			nvrhi::FramebufferDesc framebufferDesc = nvrhi::FramebufferDesc().addColorAttachment(m_RHISwapChainBuffers[i]);
 			m_SwapChainFramebuffers[i] = m_NvrhiDevice->createFramebuffer(framebufferDesc);
 		}
 	}
