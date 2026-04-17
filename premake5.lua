@@ -59,7 +59,7 @@ workspace "Epoch"
 
 	group "Dependencies"
 		include "deps/glfw"
-		include "vendor/tracy"
+		include "deps/tracy"
 		include "deps/yaml-cpp"
 	group ""
 

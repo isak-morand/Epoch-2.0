@@ -2,6 +2,9 @@
 **/bin/
 **/bin-int/
 
+!vendor
+!vendor/**
+
 # Visual Studio files and folder
 .vs/
 **.slnx
