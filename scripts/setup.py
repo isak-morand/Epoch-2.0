@@ -2,15 +2,18 @@ import os
 import platform
 import subprocess
 import sys
-import shutil
 
 def main():
     system = platform.system()
     print(f"Detected OS: {system}")
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    repo_root = os.path.abspath(os.path.join(script_dir, ".."))
+    os.chdir(repo_root)
+
     premake_exe = "premake5.exe" if system == "Windows" else "premake5"
-    premake_path = os.path.normpath(os.path.join(script_dir, "../vendor/Premake", premake_exe))
+    premake_path = os.path.abspath(os.path.join(script_dir, "..", "vendor", "Premake", premake_exe))
 
     if not os.path.isfile(premake_path):
         print(f"Error: premake not found at {premake_path}")
@@ -19,10 +22,7 @@ def main():
     if system == "Windows":
         action = "vs2026"
     elif system == "Linux":
-        if shutil.which("ninja"):
-            action = "ninja"
-        else:
-            action = "gmake2"
+        action = "gmake2"
     else:
         print(f"Unsupported OS: {system}")
         sys.exit(1)

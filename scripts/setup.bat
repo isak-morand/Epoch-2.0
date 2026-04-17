@@ -1,6 +1,5 @@
 @echo off
 pushd %~dp0
-cd ../
-python scripts/setup.py
+python setup.py
 popd
 pause
