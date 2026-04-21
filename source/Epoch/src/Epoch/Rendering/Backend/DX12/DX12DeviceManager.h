@@ -23,16 +23,16 @@ namespace Epoch::RHI
 		bool BeginFrame() override;
 		bool EndFrame() override;
 
-		nvrhi::DeviceHandle GetDevice() override { return m_NvrhiDevice; }
-		nvrhi::FramebufferHandle GetCurrentFramebuffer() override { return m_SwapChainFramebuffers[GetCurrentBackBufferIndex()]; }
-		nvrhi::TextureHandle GetCurrentFramebufferImage() override { return m_RHISwapChainBuffers[GetCurrentBackBufferIndex()]; }
+		nvrhi::IDevice* GetDevice() override { return m_NvrhiDevice; }
+		nvrhi::IFramebuffer* GetCurrentFramebuffer() override { return m_SwapChainFramebuffers[GetCurrentBackBufferIndex()]; }
+		nvrhi::ITexture* GetCurrentFramebufferImage() override { return m_RHISwapChainBuffers[GetCurrentBackBufferIndex()]; }
 
 		std::shared_ptr<RHI::Buffer> CreateBuffer(const RHI::BufferDesc& aDesc) override;
 		std::shared_ptr<RHI::Texture> CreateTexture(const RHI::TextureDesc& aDesc) override;
 
 	protected:
 		bool CreateInstance() override;
-		bool CreateDevice() override;
+		bool CreateDevice(Window* aWindow) override;
 		bool CreateSwapChain(Window* aWindow) override;
 
 		uint32_t GetCurrentBackBufferIndex() override;
@@ -49,29 +49,33 @@ namespace Epoch::RHI
 		void DestroyFramebuffers();
 
 	private:
-		ComPtr<IDXGIFactory2>					m_DxgiFactory2;
-		ComPtr<ID3D12Device>					m_Device12;
-		ComPtr<ID3D12CommandQueue>				m_GraphicsQueue;
-		ComPtr<ID3D12CommandQueue>				m_ComputeQueue;
-		ComPtr<ID3D12CommandQueue>				m_CopyQueue;
-		ComPtr<IDXGISwapChain3>					m_SwapChain;
-		DXGI_SWAP_CHAIN_DESC1					m_SwapChainDesc{};
-		DXGI_SWAP_CHAIN_FULLSCREEN_DESC			m_FullScreenDesc{};
-		ComPtr<IDXGIAdapter>					m_DxgiAdapter;
-		HWND									m_HWND = nullptr;
-		bool									m_TearingSupported = false;
+		ComPtr<IDXGIFactory2> m_DxgiFactory2;
 
-		std::vector<ComPtr<ID3D12Resource>>		m_SwapChainBuffers;
-		std::vector<nvrhi::TextureHandle>		m_RHISwapChainBuffers;
-		ComPtr<ID3D12Fence>						m_FrameFence;
-		std::vector<HANDLE>						m_FrameFenceEvents;
+		ComPtr<IDXGIAdapter> m_DxgiAdapter;
 
-		std::vector<nvrhi::FramebufferHandle>	m_SwapChainFramebuffers;
+		ComPtr<ID3D12Device> m_Device12;
+		ComPtr<ID3D12CommandQueue> m_GraphicsQueue;
+		ComPtr<ID3D12CommandQueue> m_ComputeQueue;
+		ComPtr<ID3D12CommandQueue> m_CopyQueue;
 
-		bool									m_ShouldResize = false;
+		ComPtr<IDXGISwapChain3> m_SwapChain;
+		DXGI_SWAP_CHAIN_DESC1 m_SwapChainDesc{};
+		DXGI_SWAP_CHAIN_FULLSCREEN_DESC m_FullScreenDesc{};
 
-		UINT64									m_FrameCount = 0;
+		HWND m_HWND = nullptr;
+		bool m_TearingSupported = false;
 
-		nvrhi::DeviceHandle						m_NvrhiDevice;
+		std::vector<ComPtr<ID3D12Resource>> m_SwapChainBuffers;
+		std::vector<nvrhi::TextureHandle> m_RHISwapChainBuffers;
+		ComPtr<ID3D12Fence> m_FrameFence;
+		std::vector<HANDLE> m_FrameFenceEvents;
+
+		std::vector<nvrhi::FramebufferHandle> m_SwapChainFramebuffers;
+
+		bool m_ShouldResize = false;
+
+		UINT64 m_FrameCount = 0;
+
+		nvrhi::DeviceHandle m_NvrhiDevice;
 	};
 }

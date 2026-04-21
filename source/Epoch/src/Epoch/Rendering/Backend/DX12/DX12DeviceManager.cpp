@@ -155,7 +155,7 @@ namespace Epoch::RHI
 		return true;
 	}
 
-	bool DX12DeviceManager::CreateDevice()
+	bool DX12DeviceManager::CreateDevice(Window* aWindow)
 	{
 		if (m_RenderDesc.enableDebugRuntime)
 		{

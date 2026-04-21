@@ -34,7 +34,7 @@ namespace Epoch::RHI
 		}
 		LOG_INFO(LOG_TAG, "Instance created");
 
-		if (!CreateDevice())
+		if (!CreateDevice(aWindow))
 		{
 			return false;
 		}

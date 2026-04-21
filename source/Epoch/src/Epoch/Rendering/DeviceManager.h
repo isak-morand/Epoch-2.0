@@ -28,9 +28,9 @@ namespace Epoch::RHI
 		virtual bool BeginFrame() = 0;
 		virtual bool EndFrame() = 0;
 
-		virtual nvrhi::DeviceHandle GetDevice() { return nullptr; }
-		virtual nvrhi::FramebufferHandle GetCurrentFramebuffer() { return nullptr; }
-		virtual nvrhi::TextureHandle GetCurrentFramebufferImage() { return nullptr; }
+		virtual nvrhi::IDevice* GetDevice() = 0;
+		virtual nvrhi::IFramebuffer* GetCurrentFramebuffer() = 0;
+		virtual nvrhi::ITexture* GetCurrentFramebufferImage() = 0;
 
 		virtual std::shared_ptr<RHI::Buffer> CreateBuffer(const RHI::BufferDesc& aDesc) = 0;
 		virtual std::shared_ptr<RHI::Texture> CreateTexture(const RHI::TextureDesc& aDesc) = 0;
@@ -41,7 +41,7 @@ namespace Epoch::RHI
 		DeviceManager();
 
 		virtual bool CreateInstance() = 0;
-		virtual bool CreateDevice() = 0;
+		virtual bool CreateDevice(Window* aWindow) = 0;
 		virtual bool CreateSwapChain(Window* aWindow) = 0;
 
 		virtual uint32_t GetCurrentBackBufferIndex() = 0;

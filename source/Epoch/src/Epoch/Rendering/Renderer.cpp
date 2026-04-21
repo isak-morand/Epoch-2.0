@@ -110,7 +110,7 @@ namespace Epoch
 		auto fb = m_DeviceManager->GetCurrentFramebuffer();
 
 		m_CommandList->open();
-		m_CommandList->clearTextureFloat(m_DeviceManager->GetCurrentFramebufferImage(), nvrhi::AllSubresources, nvrhi::Color(0, 0, 0, 0));
+		m_CommandList->clearTextureFloat(m_DeviceManager->GetCurrentFramebufferImage(), nvrhi::AllSubresources, nvrhi::Color(0, 0, 0, 1));
 
 		nvrhi::GraphicsState state;
 		state.pipeline = m_Pipeline;

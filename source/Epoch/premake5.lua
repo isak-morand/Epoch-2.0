@@ -14,6 +14,8 @@ project "Epoch"
 		"src/**.cpp"
 	}
 
+	VULKAN_SDK = os.getenv("VULKAN_SDK")
+	
 	includedirs
 	{
 		"src",
@@ -26,7 +28,9 @@ project "Epoch"
 
 		"%{wks.location}/vendor/NVRHI/include",
 		"%{wks.location}/vendor/NVRHI/thirdparty/DirectX-Headers/include",
-		"%{wks.location}/vendor/NVRHI/thirdparty/Vulkan-Headers/include",
+		--"%{wks.location}/vendor/NVRHI/thirdparty/Vulkan-Headers/include",
+
+		"%{VULKAN_SDK}/Include",
 	}
 
 	links
@@ -37,7 +41,13 @@ project "Epoch"
 		"NVRHI",
 		"Tracy",
 		"yaml-cpp",
+		"vulkan-1",
     }
+	
+	libdirs
+	{
+		"%{VULKAN_SDK}/Lib",
+	}
 
 	filter "configurations:Debug or configurations:Release"
 		defines

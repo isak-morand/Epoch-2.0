@@ -46,26 +46,32 @@ project "NVRHI-Vulkan"
 		NVRHI_DIR .. "/src/vulkan/**.h",
 		NVRHI_DIR .. "/src/vulkan/**.cpp",
 	}
-	
-	defines
-	{
-		--"NVRHI_WITH_RTXMU=1",
-		"VK_USE_PLATFORM_WIN32_KHR",
-		"NOMINMAX"
-	}
 
-	--VULKAN_SDK = os.getenv("VULKAN_SDK")
+	VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 	includedirs
 	{
 		NVRHI_DIR .. "/include",
 		NVRHI_DIR .. "/rtxmu/include",
 
-		--"%{VULKAN_SDK}/Include",
-		NVRHI_DIR .. "/thirdparty/Vulkan-Headers/include",
+		"%{VULKAN_SDK}/Include",
+		--NVRHI_DIR .. "/thirdparty/Vulkan-Headers/include",
 	}
 	
-    --links {  }
+	libdirs
+	{
+		"%{VULKAN_SDK}/Lib",
+	}
+	
+    links { "vulkan-1" }
+	
+	defines
+	{
+		--"NVRHI_WITH_RTXMU=1",
+		"VK_USE_PLATFORM_WIN32_KHR",
+		"NOMINMAX",
+		"VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1",
+	}
 
 project "NVRHI"
     kind "StaticLib"
@@ -90,10 +96,9 @@ project "NVRHI"
     includedirs
     {
 		NVRHI_DIR .. "/include",
-        --NVRHI_DIR .. "/rtxmu/include"
+        --NVRHI_DIR .. "/rtxmu/include",
 
 		NVRHI_DIR .. "/thirdparty/DirectX-Headers/include",
-		NVRHI_DIR .. "/thirdparty/Vulkan-Headers/include",
     }
 	
     links { "NVRHI-D3D12", "NVRHI-Vulkan" }
@@ -101,5 +106,5 @@ project "NVRHI"
 	defines
 	{
 		--"NVRHI_WITH_RTXMU=1",
-		"NOMINMAX"
+		"NOMINMAX",
 	}
